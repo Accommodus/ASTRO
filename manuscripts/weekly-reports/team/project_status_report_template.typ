@@ -5,31 +5,31 @@
   percent: [],
   due: datetime.today() + duration(days: 7),
   person: [],
-  notes: []
+  notes: [],
 ) = (
   task,
   percent,
   due.display(date-format),
   person,
-  notes
+  notes,
 )
 
 #let next-week(
   task: [],
   person: [],
-  notes: []
+  notes: [],
 ) = (
   task,
   person,
-  notes
+  notes,
 )
 
 #let issue-history(
   issue: [],
-  plan: []
+  plan: [],
 ) = (
   issue,
-  plan
+  plan,
 )
 
 #let team-report(
@@ -41,14 +41,14 @@
   next-week-list: (),
   issue-history-list: (),
   advisor-meeting: [Yes],
-  next-meeting: datetime.today() + duration(days: 7)
+  next-meeting: datetime.today() + duration(days: 7),
 ) = {
   let colors = (
     accent: rgb("1E2651"),
     highlight: rgb("2E69FF"),
     lowlight: rgb("595959"),
     header: white,
-    text: black
+    text: black,
   )
 
   let header-font = "Calibri"
@@ -57,11 +57,11 @@
   let inset-amount = 0.65em
 
   let process-args(func: auto, data) = {
-    if func == auto {return data}
+    if func == auto { return data }
 
-    let data = if type(data) != array {(data,)} else {data}
+    let data = if type(data) != array { (data,) } else { data }
     let data = data.map(it => {
-      if type(it) == dictionary {return func(..it)} else {return it}
+      if type(it) == dictionary { return func(..it) } else { return it }
     })
 
     return data.flatten()
@@ -72,16 +72,16 @@
     func: auto,
     columns,
     headers,
-    data
+    data,
   ) = table(
     inset: inset-amount,
-    stroke: if lines {(bottom:0.5pt + colors.accent, rest: none)} else {none},
+    stroke: if lines { (bottom: 0.5pt + colors.accent, rest: none) } else { none },
     columns: columns,
     table.header(
       ..headers.map(it => {
         set text(font: header-font, fill: colors.accent, size: 10pt, weight: "light")
         upper(it)
-      })
+      }),
     ),
     ..process-args(func: func, data)
   )
@@ -106,7 +106,7 @@
       lines: false,
       (1fr, 1fr, 1fr),
       ([Report Date], [Team Name], [Prepared For]),
-      (date.display(date-format), team-name, prepared-for)
+      (date.display(date-format), team-name, prepared-for),
     )
 
     = Status Summary/Completed Activities
@@ -117,7 +117,7 @@
       func: in-progress,
       (1fr, 0.5fr, 1fr, 1.25fr, 1fr),
       ([Task], [% Done], [Due Date], [Person Responsible], [Notes]),
-      in-progress-list
+      in-progress-list,
     )
 
     = Activities Planned for Next Week
@@ -125,7 +125,7 @@
       func: next-week,
       (1fr, 1fr, 2fr),
       ([Tasks], [Person Responsible], [Notes]),
-      next-week-list
+      next-week-list,
     )
 
     = Risk and issue history
@@ -133,7 +133,7 @@
       func: issue-history,
       (1fr, 1fr),
       ([Issue], [Mitigation Plan]),
-      issue-history-list
+      issue-history-list,
     )
 
     #v(1em)
@@ -149,7 +149,7 @@
           DID YOUR TEAM MEET WITH YOUR FACULTY ADVISOR THIS WEEK? #advisor-meeting \
           Next Scheduled Meeting with your advisor: #next-meeting.display(date-format)
         ]
-      }
+      },
     )
   ]
 }
