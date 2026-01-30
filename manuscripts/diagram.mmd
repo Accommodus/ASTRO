@@ -1,0 +1,46 @@
+flowchart LR
+    subgraph Generic_Sim [Simulation Environment]
+        direction LR
+
+        %% The Physics/Dynamics Column (Vertical Stack)
+        subgraph Dynamics_Stack [ ]
+            direction TB
+            OrbMech["Orbital Mechanics / Attitude Dynamics"]
+            Actuator["Actuator Model (thruster/torque)"]
+            
+            %% Internal Flow (Physics Loop)
+            Actuator --> OrbMech
+        end
+    end
+
+    Sim_Adapter[Sim Bridge / Adapter]
+
+    subgraph ROS2
+        direction LR
+
+        %% The Vertical Bus
+        ROS2_Bus[ROS2 Interface]
+
+        %% The Modules Column
+        subgraph Modules_Stack [ ]
+            direction TB
+            SensSim[Sensor Simulator]
+            NavMod[Navigation Module]
+            GuidMod[Guidance Module]
+            CtrlMod[Control Module]
+        end
+
+        %% Bi-directional connections to the Bus
+        ROS2_Bus <--> SensSim
+        ROS2_Bus <--> NavMod
+        ROS2_Bus <--> GuidMod
+        ROS2_Bus <--> CtrlMod
+    end
+
+    %% Sim <--> Bridge (Raw Sim Data)
+    OrbMech -->|"Ground Truth / Simulation State"| Sim_Adapter
+    Sim_Adapter -->|"Actuator Cmds"| Actuator
+
+    %% Bridge <--> ROS2 (ROS Messages)
+    Sim_Adapter -->|"Ground truth (ROS msg)"| ROS2_Bus
+    ROS2_Bus -->|"Control Cmds (ROS msg)"| Sim_Adapter
