@@ -1,4 +1,15 @@
-#let date-format = "[Month repr:long] [day padding:none], [year]"
+#let display-date(
+  date: auto,
+  ..datetime-args,
+) = {
+  let format = "[Month repr:long] [day padding:none], [year]"
+
+  if date == auto {
+    datetime(..datetime-args).display(format)
+  } else {
+    date.display(format)
+  }
+}
 
 #let in-progress(
   task: [],
@@ -9,7 +20,7 @@
 ) = (
   task,
   percent,
-  due.display(date-format),
+  display-date(date: datetime.today() + duration(days: 7)),
   person,
   notes,
 )
@@ -86,7 +97,7 @@
     ..process-args(func: func, data)
   )
 
-  set text(font: input-font, fill: colors.text, size: 10pt, weight: "light")
+  set text(font: input-font, fill: colors.text, size: 10pt, weight: "light", kerning: false)
 
   show title: it => {
     set text(font: header-font, fill: colors.accent, size: 24pt, weight: "light")
@@ -106,7 +117,7 @@
       lines: false,
       (1fr, 1fr, 1fr),
       ([Report Date], [Team Name], [Prepared For]),
-      (date.display(date-format), team-name, prepared-for),
+      (display-date(date: date), team-name, prepared-for),
     )
 
     = Status Summary/Completed Activities
@@ -147,7 +158,7 @@
 
         highlight()[
           DID YOUR TEAM MEET WITH YOUR FACULTY ADVISOR THIS WEEK? #advisor-meeting \
-          Next Scheduled Meeting with your advisor: #next-meeting.display(date-format)
+          Next Scheduled Meeting with your advisor: #display-date(date: next-meeting)
         ]
       },
     )
