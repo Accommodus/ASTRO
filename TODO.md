@@ -22,10 +22,16 @@ Convert QP_MPC to ROS Package
 ## Dylan:
 
 - Make ROS2 Component Skeleton
-- Populate Env Node with code in 'reference/udp_hcw_discrete_txrx 2 1.cpp'
+- Populate Env Node with code in `reference/udp_hcw_discrete_txrx 2 1.cpp`
     - Remove networking
     - Replace logging with ROS2 logging
 
 ## Cannon:
 
 - Extract final set of C++ header files
+
+## Caleb:
+
+- Populate Control Node with code in `reference/quadprogMPC_roundtrip.cpp`
+    - Remove networking
+    - Replace logging with ROS2 logging
