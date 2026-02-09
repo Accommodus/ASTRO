@@ -10,7 +10,7 @@ Convert QP_MPC to ROS Package
         - GNC (**Node**): Ported from the NJON part of `QP_MPC`. (Consider splitting into specific **Navigation**, **Guidance**, and **Control** nodes if complexity grows).
         - Communication:
             - `env_data` (**Topic**): High-frequency telemetry/state info from env to GNC.
-            - `actuation_cmd` (**Topic**): Control signals sent from GNC to the environment.
+            - `actuation_cmd` (**Service**): Control signals sent from GNC to the environment.
         - *Note: More ROS2 components may need to be added*
 2. Implementation & Node Capture
     - Node Migration: Wrap existing `QP_MCP` functionality into ROS 2 nodes.
