@@ -1,0 +1,16 @@
+//https://arxiv.org/abs/2512.09833
+
+== Bridging the Basilisk Astrodynamics Framework with ROS 2 for Modular Spacecraft Simulation and Hardware Integration
+  This study focuses on a bridge software that links Basilisk and ROS 2 to simulate spacecraft and provide a bidirectional messaging service. The ultimate goal of this project is to allow ROS 2 to control and interact with the simulation without modifying Basilisk itself. The implementation is primarily in Python using ROS2 and Basilisk modules. This project is extremely similar to what is planned for ASTRO, but it focuses on a more narrowly targeted case of Basilisk rather than on any simulation software. The BSK-ROS2-Bridge works well in this case, but it is limited by the fact that it cannot explicitly work with other simulation software @bsk.
+  
+  The functionality of the bridge is also focused on 2D planes with 3 satellites, which are comprised of a leader and 2 followers. It must be noted that this limitation is specifically in place to demonstrate the feasibility of this software, rather than being the general solution. It found great results when running testing under this model to demonstrate the concept. More importantly, it does lay valuable groundwork for bridging the gap between simulation software and ROS2, which ASTRO seeks to further expand upon @bsk. 
+
+== A Dynamic Bridge Architecture for Efficient Interoperability Between AUTOSAR Adaptive and ROS2
+  This study is focused on a bridge software that allows for bidirectional communication between AUTOSAR Adaptive and ROS2 and improves on previous bridges. The previous approach was inefficient and had compatibility issues with Quality of Service. This project consists of 3 core components: a Discovery Manager, a Bridge Manager, and a Message Router. This approach gave promising results with low latency in autonomous driving tests, as well as cutting resource usage @autosar. 
+
+  Important takeaways from this literature are that the methodology of creating multiple components proves helpful in linking the software together for the dual direction communication. This bridge is very similar to the patterns and problems we see for our implementation of a bridge for ROS 2 and aerospace simulation software, and provides valuable lessons on how to use the findings for satellites instead of vehicles @autosar.
+
+== Design of an Open Hardware Bridge Between Robots and ROS / non–ROS Environments
+  The following study is also focused on creating a bridge between multiple different machines, as well as software for those machines. The problem for this research was that differing manufacturers made it difficult to interface robots, the goal being centralized control of these machines from just a core computer @bridge.
+
+  This study is similar to our overall problem as it tackles the difficulty of translation between different machines or simulations. With the final implementation, it is also similar to ours as it sought to have a unified language that could communicate between each device, which is our end goal and will be done using ROS 2 in our case. The key difference is that this study relied on hardware, while ours will be software-based and largely applicable. @bridge.

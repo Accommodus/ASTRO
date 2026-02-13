@@ -1,0 +1,50 @@
+autosar:
+  type: article
+  title: A Dynamic Bridge Architecture for Efficient Interoperability Between AUTOSAR Adaptive and ROS2
+  author:
+  - Kim, Suhong
+  - Choi, Hyeongju
+  - Lee, Suhaeng
+  - Kim, Minseo
+  - Shin, Hyunseo
+  - Moon, Changjoo
+  date: 2025
+  url: https://www.mdpi.com/2079-9292/14/18/3635
+  serial-number:
+    doi: 10.3390/electronics14183635
+    issn: 2079-9292
+  abstract: 'The automotive industry is undergoing a transition toward Software-Defined Vehicles (SDVs), necessitating the integration of AUTOSAR Adaptive, a standard for vehicle control, with ROS2, a platform for autonomous driving research. However, current static bridge approaches present notable limitations, chiefly regarding unnecessary resource consumption and compatibility issues with Quality of Service (QoS). To tackle these challenges, in this paper, we put forward a dynamic bridge architecture consisting of three components: a Discovery Manager, a Bridge Manager, and a Message Router. The proposed dynamic SOME/IP-DDS bridge dynamically detects service discovery events from the SOME/IP and DDS domains in real time, allowing for the creation and destruction of communication entities as needed. Additionally, it automatically manages QoS settings to ensure that they remain compatible. The experimental results indicate that this architecture maintains a stable latency even with a growing number of connections, demonstrating high scalability while also reducing memory usage during idle periods compared to static methods. Moreover, real-world assessments using an autonomous driving robot confirm its real-time applicability by reliably relaying sensor data to Autoware with minimal end-to-end latency. This research contributes to expediting the integration of autonomous driving exploration and production vehicle platforms by offering a more efficient and robust interoperability solution.'
+  parent:
+    type: periodical
+    title: Electronics
+    issue: 18
+    volume: 14
+bsk:
+  type: article
+  title: Bridging the Basilisk Astrodynamics Framework with ROS 2 for Modular Spacecraft Simulation and Hardware Integration
+  author:
+  - Krantz, Elias
+  - Chan, Ngai Nam
+  - Tibert, Gunnar
+  - Mao, Huina
+  - Fuglesang, Christer
+  date: 2025
+  url: https://arxiv.org/abs/2512.09833
+  serial-number:
+    arxiv: '2512.09833'
+bridge:
+  type: article
+  title: Design of an Open Hardware Bridge Between Robots and ROS/non-ROS Environments
+  author:
+  - Bergeon, Yves
+  - Krivanek, Vaclav
+  date: 2018
+  page-range: 199-204
+  url: https://advances.vsb.cz/index.php/AEEE/article/view/2439
+  serial-number:
+    doi: 10.15598/aeee.v16i2.2439
+  parent:
+    type: periodical
+    title: Advances in Electrical and Electronic Engineering
+    issue: 2
+    volume: 16
