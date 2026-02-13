@@ -104,12 +104,6 @@ ROS 2 exposes system data through topics, services, and logging — accessible v
 
 = Individual Responsibilities
 
-== Cannon — Project Manager
-
-- Extract final set of C++ header files for shared types
-- Coordinate architecture decisions and team schedule
-- Oversee integration testing between nodes
-
 == Dylan — SCRUM Master
 
 - Build the ROS 2 component skeleton (package layout, launch files)
@@ -123,3 +117,9 @@ ROS 2 exposes system data through topics, services, and logging — accessible v
   - Remove networking layer
   - Replace logging with ROS 2 logging
 - Verify outputs against the original standalone executable
+
+== Cannon — Project Manager
+
+- Coordinate with STAR Lab
+- Coordinate architecture decisions and team schedule
+- Oversee integration testing between nodes
