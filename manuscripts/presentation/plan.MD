@@ -9,6 +9,13 @@ Project Design: This section should have two subsections as outlined below.
     
 
     User Interface Designs: The user interface is a visual representation of the front-end application view and can be displayed through wireframes, information architecture, and graphical user interfaces (GUIs).
+        - ui-arch
 
 Project Progress: Include an update in terms of requirements documentation, user stories, or product backlog. A summary of completed milestones and technical implementation details, issues, and strategies.
+    1. Complete integration with DLQR
+    2. Complete integration with QP_MCP
+    3. Add tasking layer
+    4. integrate UI
+
 Individual Responsibilities: Each team member should present their own tasks and plan for completing those tasks.
+(Base off of TODO.md)
