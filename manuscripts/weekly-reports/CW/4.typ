@@ -61,15 +61,17 @@ This section demonstrates your ability to critically assess your work and grow f
 #title[Cannon Whitney's Report]
 
 = Time Dedicated to the Project
-3 hours: coordinating with STAR Lab on aquiring reference files and future work \
-2 hours: planning out immediate next steps and how to achieve themes \ 
+3 hours: coordinating with STAR Lab on acquiring reference files and future work \
+2 hours: planning out immediate next steps and how to achieve them \
 4 hours: working on the first presentation
 
+In total I spent about 9 hours this week. I kept progress steady by splitting time between external coordination, internal planning, and deliverable work so that the team had a clear direction and a concrete artifact (the presentation) by the end of the week.
+
 = Contribution to the Project Development Process
-I designed the architecture of our initial ROS2 package. Afterwards, I layed out assigned the tasks needed to implement it. I reviewed the structure of the reference files sent by the STAR Lab, so our package can be compared to a known solution.
+I designed the architecture of our initial ROS 2 package. Afterwards, I laid out and assigned the tasks needed to implement it. I reviewed the structure of the reference files sent by the STAR Lab so our package can be compared to a known solution.
 
 = Demonstration of Applied Knowledge
-I discussed the project scope and requirements with the team, and I was able to apply my knowledge of the project to help the team understand the project and how to proceed. I finished setting up the ROS2 development environment using a devcontainer with a docker image.
+I created project scaffolding for the ROS 2 package and sketched out the required ROS 2 components and how they should be integrated. I applied prior knowledge of ROS 2 and software architecture to turn the lab's existing executables into a pub/sub design. I also communicated with other members of the STAR Lab to ensure this architecture would address their needs.
 
 = Reflection and Lessons Learned
-I had to coordinate with a team within the STAR lab so that we could repackage their program into ROS2.
+I figured that early, explicit communication with external stakeholders pays off—getting concrete reference material and feedback before locking the architecture helped avoid rework. I also saw how useful it is to separate “coordination and planning” from “implementation” in my own schedule so that the team always has a clear next step. I will continue to validate the design against the reference solution as we implement.
