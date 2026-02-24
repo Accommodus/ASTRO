@@ -1,5 +1,5 @@
 {
-    "name": "ROS 2 Development Container",
+    "name": "ROS 2 Development Container (macOS)",
     "privileged": true,
     "remoteUser": "ros",
     "build": {
@@ -23,21 +23,8 @@
         }
     },
     "containerEnv": {
-        "DISPLAY": "unix:0",
         "ROS_AUTOMATIC_DISCOVERY_RANGE": "LOCALHOST",
         "ROS_DOMAIN_ID": "42"
     },
-    "runArgs": [
-        "--net=host",
-        "--pid=host",
-        "--ipc=host",
-        "-e",
-        "DISPLAY=${env:DISPLAY}"
-    ],
-    "mounts": [
-        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
-        "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached"
-    ],
-    // attempting to fix issue where git locks are not released:
-    "postCreateCommand": "sudo rosdep update && sudo rosdep install --from-paths src --ignore-src -y && sudo chown -R $(whoami) /home/ws && sudo rm -f /home/ws/.git/*.lock /home/ws/.git/refs/heads/*.lock"
+    "postCreateCommand": "sudo rosdep update && sudo rosdep install --from-paths src --ignore-src -y"
 }

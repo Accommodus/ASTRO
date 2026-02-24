@@ -3,18 +3,29 @@
    href="http://download.ros.org/schema/package_format3.xsd"
    schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
- <name>my_package</name>
- <version>0.0.0</version>
- <description>TODO: Package description</description>
- <maintainer email="user@todo.todo">user</maintainer>
- <license>TODO: License declaration</license>
+  <name>distributed_satellite_sim</name>
+  <version>0.1.0</version>
+  <description>
+    ROS 2 package for distributed satellite simulation.
+  </description>
+  <maintainer email="cannon.whitney@ufl.edu">Cannon Whitney</maintainer>
+  <maintainer email="calebjackson@ufl.edu">Caleb Jackson</maintainer>
+  <maintainer email="dylan.long@ufl.edu">Dylan Long</maintainer>
+  <license>TODO</license>
 
- <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
 
- <test_depend>ament_lint_auto</test_depend>
- <test_depend>ament_lint_common</test_depend>
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
 
- <export>
-   <build_type>ament_cmake</build_type>
- </export>
+  <member_of_group>rosidl_interface_packages</member_of_group>
+  <exec_depend>rosidl_default_runtime</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>
