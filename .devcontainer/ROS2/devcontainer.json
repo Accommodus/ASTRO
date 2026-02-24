@@ -38,5 +38,6 @@
         "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
         "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached"
     ],
-    "postCreateCommand": "sudo chown -R $(whoami) /home/ws && sudo rosdep update && sudo rosdep install --from-paths src --ignore-src -y"
+    // attempting to fix issue where git locks are not released:
+    "postCreateCommand": "sudo rosdep update && sudo rosdep install --from-paths src --ignore-src -y && sudo chown -R $(whoami) /home/ws && sudo rm -f /home/ws/.git/*.lock /home/ws/.git/refs/heads/*.lock"
 }
