@@ -1,11 +1,12 @@
 {
-  "name": "ROS 2 Development Container (Compose)",
+  "name": "ROS 2 Development Container",
   "dockerComposeFile": [
     "docker-compose.yml",
     "docker-compose.override.yml"
   ],
   "service": "ros2",
-  "initializeCommand": "bash .devcontainer/init.sh || powershell -NoProfile -ExecutionPolicy Bypass -File .devcontainer/init.ps1",
+  "workspaceFolder": "/home/ws",
+  "initializeCommand": "bash .devcontainer/init.sh",
   "customizations": {
     "vscode": {
       "extensions": [
