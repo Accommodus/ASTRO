@@ -1,28 +1,23 @@
 #!/usr/bin/env bash
-set -eo pipefail
+
+# All setup is best-effort. The container MUST reach `exec "$@"` (sleep infinity)
+# so VS Code / Cursor can attach. No step here should be able to kill the container.
 
 SENTINEL="/home/ws/.devcontainer/.setup_done"
 
-# First-run only: fix volume ownership, clear stale git locks, install rosdep deps
 if [ ! -f "$SENTINEL" ]; then
     echo "[entrypoint] First-run setup..."
-    sudo chown -R "$(whoami)" /home/ws
-    sudo rm -f /home/ws/.git/*.lock /home/ws/.git/refs/heads/*.lock
-    sudo rosdep update
-    sudo rosdep install --from-paths src --ignore-src -y
-    mkdir -p "$(dirname "$SENTINEL")"
-    touch "$SENTINEL"
+    sudo chown -R "$(whoami)" /home/ws                             2>&1 || true
+    sudo rm -f /home/ws/.git/*.lock /home/ws/.git/refs/heads/*.lock     || true
+    sudo rosdep update                                             2>&1 || true
+    sudo rosdep install --from-paths src --ignore-src -y           2>&1 || true
+    mkdir -p "$(dirname "$SENTINEL")" && touch "$SENTINEL"              || true
 fi
 
-# Source ROS so subsequent steps (colcon, exec'd shell) can use it.
-# ROS setup scripts reference unset vars internally, so -u must be off here.
-set +u
-# shellcheck disable=SC1091
-source "/opt/ros/$ROS_DISTRO/setup.bash"
-set -u
+# ROS setup scripts reference uninitialized vars; source without strict mode
+source "/opt/ros/${ROS_DISTRO:-kilted}/setup.bash" 2>/dev/null || true
 
-# Build the workspace on every start (no-op if nothing changed).
 echo "[entrypoint] Building ROS 2 workspace..."
-colcon build --symlink-install || echo "[entrypoint] colcon build failed (non-fatal) -- continuing"
+colcon build --symlink-install 2>&1 || echo "[entrypoint] colcon build failed (non-fatal)"
 
 exec "$@"
