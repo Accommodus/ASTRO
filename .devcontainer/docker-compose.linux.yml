@@ -1,0 +1,10 @@
+services:
+  ros2:
+    network_mode: "host"
+    pid: "host"
+    ipc: "host"
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev/dri:/dev/dri:rw

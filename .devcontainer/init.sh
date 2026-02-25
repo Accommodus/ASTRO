@@ -2,59 +2,23 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-OVERRIDE_FILE="$ROOT_DIR/docker-compose.override.yml"
+TARGET="$ROOT_DIR/docker-compose.override.yml"
 
-UNAME_S="$(uname -s || echo unknown)"
+detect_host_os() {
+  if grep -qi microsoft /proc/version 2>/dev/null; then
+    echo "windows"
+  else
+    case "$(uname -s)" in
+      Linux*)                 echo "linux"   ;;
+      Darwin*)                echo "darwin"  ;;
+      MINGW*|MSYS*|CYGWIN*)  echo "windows" ;;
+      *)                      echo "darwin"  ;;
+    esac
+  fi
+}
 
-echo "Generating docker-compose.override.yml for host OS: $UNAME_S"
+HOST_OS="$(detect_host_os)"
 
-case "$UNAME_S" in
-  Linux*)
-    DISPLAY_VALUE="${DISPLAY:-:0}"
-    cat > "$OVERRIDE_FILE" << YAML
-version: "3.8"
-
-services:
-  ros2:
-    network_mode: "host"
-    pid: "host"
-    ipc: "host"
-    environment:
-      - DISPLAY=$DISPLAY_VALUE
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - /dev/dri:/dev/dri:rw
-YAML
-    ;;
-  Darwin*)
-    cat > "$OVERRIDE_FILE" << 'YAML'
-services:
-  ros2: {}
-YAML
-    ;;
-  MINGW*|MSYS*|CYGWIN*)
-    cat > "$OVERRIDE_FILE" << 'YAML'
-version: "3.8"
-
-services:
-  ros2:
-    network_mode: "host"
-    pid: "host"
-    ipc: "host"
-    environment:
-      - DISPLAY=host.docker.internal:0
-YAML
-    ;;
-  *)
-    echo "Warning: unknown host OS '$UNAME_S', generating minimal override."
-    cat > "$OVERRIDE_FILE" << 'YAML'
-version: "3.8"
-
-services:
-  ros2: {}
-YAML
-    ;;
-
-esac
-
-echo "Wrote $OVERRIDE_FILE"
+echo "[init] Detected host OS: $HOST_OS"
+cp "$ROOT_DIR/docker-compose.$HOST_OS.yml" "$TARGET"
+echo "[init] Wrote $TARGET"

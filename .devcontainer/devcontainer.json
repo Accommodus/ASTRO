@@ -5,7 +5,7 @@
     "docker-compose.override.yml"
   ],
   "service": "ros2",
-  "initializeCommand": "bash .devcontainer/init.sh",
+  "initializeCommand": "bash .devcontainer/init.sh || powershell -NoProfile -ExecutionPolicy Bypass -File .devcontainer/init.ps1",
   "customizations": {
     "vscode": {
       "extensions": [

@@ -1,0 +1,7 @@
+services:
+  ros2:
+    network_mode: "host"
+    pid: "host"
+    ipc: "host"
+    environment:
+      - DISPLAY=host.docker.internal:0
