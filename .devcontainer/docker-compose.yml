@@ -1,0 +1,10 @@
+services:
+  ros2:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    privileged: true
+    working_dir: /home/ws
+    volumes:
+      - ..:/home/ws:cached
+    command: sleep infinity
