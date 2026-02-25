@@ -20,7 +20,15 @@ def generate_launch_description():
         }],
     )
 
+    gnc_node = Node(
+        package='distributed_satellite_sim',
+        executable='gnc_node',
+        name='gnc_node',
+        output='screen',
+    )
+
     return LaunchDescription([
         max_steps_arg,
         env_node,
+        gnc_node,
     ])
