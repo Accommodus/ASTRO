@@ -2,23 +2,21 @@
 
 #team-report(
   completed: [
-    - presentation
-    - architecture for first package
   ],
   in-progress-list: (
     in-progress(
-      due: datetime(month: 2, day: 23, year: 2026),
-      notes: [Make branches and auto github insights],
-      percent: [70%],
-      person: [Dylan],
-      task: [Set-up SCRUM / Agile],
-    ),
-    in-progress(
       due: datetime(month: 2, day: 28, year: 2026),
       notes: [Based on files in reference],
-      percent: [40%],
+      percent: [90%],
       person: [Dylan, Cannon, Caleb],
-      task: [Convert C++ FSW algs. to ROS2 package],
+      task: [Convert first two C++ algs. to ROS2 package],
+    ),
+    in-progress(
+      due: datetime(month: 3, day: 10, year: 2026),
+      notes: [Based on files in reference],
+      percent: [90%],
+      person: [Dylan, Cannon, Caleb],
+      task: [Convert MCP C++ to ROS2 package],
     ),
   ),
   next-week-list: (
