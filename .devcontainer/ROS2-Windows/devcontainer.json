@@ -30,5 +30,5 @@
         "--pid=host",
         "--ipc=host"
     ],
-    "postCreateCommand": "sudo chown -R $(whoami) /home/ws && sudo rosdep update && sudo rosdep install --from-paths src --ignore-src -y"
+    "postCreateCommand": "sudo chown -R $(whoami) /home/ws && rosdep update && sudo -E rosdep install --from-paths src --ignore-src -y"
 }
