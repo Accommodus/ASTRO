@@ -23,25 +23,17 @@ RUN apt-get update \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
-# System packages, Python toolchain, and C++ toolchain
+# System packages and Python toolchain
 RUN apt-get update && apt-get upgrade -y \
     && apt-get install -y \
-        python3 python3-pip python3-venv python3-dev \
-        build-essential gcc g++ cmake gdb \
-        openssh-client git \
+        python3-pip \
+        openssh-client \
+        git \
     && rm -rf /var/lib/apt/lists/*
 
 ENV SHELL=/bin/bash
-ENV ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
-ENV ROS_DOMAIN_ID=42
-
-COPY .devcontainer/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 USER $USERNAME
-WORKDIR /home/ws
-
-ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash"]
 
 # Source ROS 2 in every new terminal
@@ -49,6 +41,3 @@ RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/$USERNAME/.bashrc
 
 # Add colcon build tab-completion
 RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> /home/$USERNAME/.bashrc
-
-# Source the workspace install overlay if it has been built
-RUN echo 'if [ -f /home/ws/install/setup.bash ]; then source /home/ws/install/setup.bash; fi' >> /home/$USERNAME/.bashrc

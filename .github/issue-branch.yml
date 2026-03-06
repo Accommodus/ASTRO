@@ -1,0 +1,10 @@
+mode: immediate
+autoLinkIssue: true
+autoCloseIssue: true
+autoDeleteBranch: true
+
+openDraftPR: true
+copyIssueDescriptionToPR: true
+copyIssueLabelsToPR: true
+copyIssueAssigneeToPR: true
+copyIssueMilestoneToPR: true

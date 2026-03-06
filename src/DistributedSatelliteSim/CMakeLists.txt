@@ -42,8 +42,18 @@ install(TARGETS env_node_lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
+# ---------- GNC Node ----------
+add_executable(gnc_node src/gnc_node.cpp)
+target_include_directories(gnc_node PRIVATE
+  ${EIGEN3_INCLUDE_DIRS}
+)
+ament_target_dependencies(gnc_node
+  rclcpp
+  std_msgs
+)
+target_link_libraries(gnc_node "${typesupport_target}")
 
-install(TARGETS env_node
+install(TARGETS env_node gnc_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
