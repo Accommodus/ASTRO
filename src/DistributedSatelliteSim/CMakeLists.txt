@@ -16,17 +16,32 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/ActuationCmd.srv"
 )
 
-# ---------- Env Node ----------
-add_executable(env_node src/env_node.cpp)
-target_include_directories(env_node PRIVATE
+rosidl_get_typesupport_target(typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
+
+# ---------- Env Node library (testable) ----------
+add_library(env_node_lib SHARED
+  src/env_node.cpp
+)
+target_include_directories(env_node_lib PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
   ${EIGEN3_INCLUDE_DIRS}
 )
-ament_target_dependencies(env_node
-  rclcpp
-  std_msgs
+target_link_libraries(env_node_lib
+  ${std_msgs_TARGETS}
+  rclcpp::rclcpp
+  "${typesupport_target}"
 )
-rosidl_get_typesupport_target(typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
-target_link_libraries(env_node "${typesupport_target}")
+
+# ---------- Env Node executable ----------
+add_executable(env_node src/env_node.cpp)
+target_link_libraries(env_node env_node_lib)
+
+install(TARGETS env_node_lib
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
 install(TARGETS env_node
   DESTINATION lib/${PROJECT_NAME}
@@ -39,6 +54,10 @@ install(DIRECTORY launch/
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
+
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_env_node test/test_env_node.cpp)
+  target_link_libraries(test_env_node env_node_lib)
 endif()
 
 ament_package()
