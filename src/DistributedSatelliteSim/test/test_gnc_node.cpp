@@ -14,9 +14,9 @@
 //
 // Unit tests for GncNode DLQR control law.
 
-#include <Eigen/Dense>
+#include "test_gnc_node.hpp"
+
 #include <gtest/gtest.h>
-#include <rclcpp/rclcpp.hpp>
 
 #include <chrono>
 #include <memory>
