@@ -25,10 +25,22 @@ ament_target_dependencies(env_node
   rclcpp
   std_msgs
 )
+
+# ---------- GNC Node ----------
+add_executable(gnc_node src/gnc_node.cpp)
+target_include_directories(gnc_node PRIVATE
+  ${EIGEN3_INCLUDE_DIRS}
+)
+ament_target_dependencies(gnc_node
+  rclcpp
+  std_msgs
+)
+
 rosidl_get_typesupport_target(typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
 target_link_libraries(env_node "${typesupport_target}")
+target_link_libraries(gnc_node "${typesupport_target}")
 
-install(TARGETS env_node
+install(TARGETS env_node gnc_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
