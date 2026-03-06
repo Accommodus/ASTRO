@@ -2,8 +2,6 @@ name: Build and publish base devcontainer image
 
 on:
   push:
-    branches:
-      - main
     paths:
       - '.devcontainer/base.Dockerfile'
       - '.github/workflows/build-base-image.yml'
