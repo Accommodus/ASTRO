@@ -30,6 +30,7 @@ ament_target_dependencies(env_node
 add_executable(gnc_node src/gnc_node.cpp)
 target_include_directories(gnc_node PRIVATE
   ${EIGEN3_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 ament_target_dependencies(gnc_node
   rclcpp
@@ -51,6 +52,21 @@ install(DIRECTORY launch/
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
+
+  find_package(ament_cmake_gtest REQUIRED)
+
+  ament_add_gtest(test_gnc_node
+    test/test_gnc_node.cpp
+  )
+  target_include_directories(test_gnc_node PRIVATE
+    ${EIGEN3_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+  )
+  ament_target_dependencies(test_gnc_node
+    rclcpp
+    std_msgs
+  )
+  target_link_libraries(test_gnc_node "${typesupport_target}")
 endif()
 
 ament_package()

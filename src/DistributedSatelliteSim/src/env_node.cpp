@@ -1,6 +1,20 @@
+// Copyright 2026 Accommodus
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include <Eigen/Dense>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
-#include <Eigen/Dense>
 
 #include "distributed_satellite_sim/srv/actuation_cmd.hpp"
 
@@ -9,7 +23,8 @@ using ActuationCmd = distributed_satellite_sim::srv::ActuationCmd;
 class EnvNode : public rclcpp::Node
 {
 public:
-  EnvNode() : Node("env_node")
+  EnvNode()
+  : Node("env_node")
   {
     declare_parameter("max_steps", 91);
     max_steps_ = get_parameter("max_steps").as_int();
@@ -20,8 +35,9 @@ public:
 
     cmd_srv_ = create_service<ActuationCmd>(
       "actuation_cmd",
-      [this](const std::shared_ptr<ActuationCmd::Request> req,
-             std::shared_ptr<ActuationCmd::Response> res) {
+      [this](
+        const std::shared_ptr<ActuationCmd::Request> req,
+        std::shared_ptr<ActuationCmd::Response> res) {
         actuation_callback(req, res);
       });
 
@@ -39,20 +55,20 @@ private:
     u_now_ = Eigen::Vector3d::Zero();  // zero until first actuation_cmd call
 
     Ad_ <<
-      1.25645279151274,      0, 0, 349.682205848334,  147.7805051,       0,
-     -0.0716204647063059,    1, 0, -147.7805051,      318.728823393334,  0,
-      0,                     0, 0.914515736162421, 0,  0,                349.682205848334,
-      0.0014040831838806,    0, 0, 0.914515736162421,  0.809100657054006, 0,
-     -0.00059338484671504,   0, 0, -0.809100657054006, 0.658062944649682, 0,
-      0,                     0, -0.000468027727960198, 0, 0,              0.914515736162421;
+      1.25645279151274, 0, 0, 349.682205848334, 147.7805051, 0,
+      -0.0716204647063059, 1, 0, -147.7805051, 318.728823393334, 0,
+      0, 0, 0.914515736162421, 0, 0, 349.682205848334,
+      0.0014040831838806, 0, 0, 0.914515736162421, 0.809100657054006, 0,
+      -0.00059338484671504, 0, 0, -0.809100657054006, 0.658062944649682, 0,
+      0, 0, -0.000468027727960198, 0, 0, 0.914515736162421;
 
     Bd_ <<
-      63868.7072544296,  17836.8364281426, 0,
-     -17836.8364281426,  61074.8290177183, 0,
-      0,                 0,                63868.7072544296,
-      349.682205848334,  147.7805051,      0,
-     -147.7805051,       318.728823393334, 0,
-      0,                 0,                349.682205848334;
+      63868.7072544296, 17836.8364281426, 0,
+      -17836.8364281426, 61074.8290177183, 0,
+      0, 0, 63868.7072544296,
+      349.682205848334, 147.7805051, 0,
+      -147.7805051, 318.728823393334, 0,
+      0, 0, 349.682205848334;
   }
 
   void timer_callback()
@@ -69,7 +85,8 @@ private:
     msg.data.assign(x_now_.data(), x_now_.data() + x_now_.size());
     state_pub_->publish(msg);
 
-    RCLCPP_INFO(get_logger(),
+    RCLCPP_INFO(
+      get_logger(),
       "step %d: x = [%.6f, %.6f, %.6f, %.6f, %.6f, %.6f]",
       step_,
       x_now_(0), x_now_(1), x_now_(2),
@@ -85,7 +102,8 @@ private:
     u_now_ << req->thrust[0], req->thrust[1], req->thrust[2];  // applied on next timer tick
     res->success = true;
 
-    RCLCPP_INFO(get_logger(),
+    RCLCPP_INFO(
+      get_logger(),
       "actuation_cmd received: u = [%.6e, %.6e, %.6e]",
       u_now_(0), u_now_(1), u_now_(2));
   }
