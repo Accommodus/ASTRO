@@ -20,4 +20,3 @@
 // (test_gnc_node.hpp) is included first.
 
 #endif  // TEST_GNC_NODE_HPP_
-
