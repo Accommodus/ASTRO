@@ -38,8 +38,7 @@
 From our proposal and backlog, we focused this phase on finalizing core implementation and starting validation.
 
 #table(
-  columns: (1.5fr, 1fr, 1.6fr),
-  align: (left, center, left),
+  columns: 3,
   table.header([*Backlog / Milestone Item*], [*Status*], [*Evidence / Next Step*]),
   [Modular simulation + flight software engines], [In Progress], [ROS 2 Env + GNC node path implemented and integrated],
   [Bridge across machines], [In Progress], [Current ROS 2 graph operational; CI/CD deployment image issue remains open (#18)],
@@ -51,8 +50,7 @@ From our proposal and backlog, we focused this phase on finalizing core implemen
 == GitHub Progress Since Presentation 1
 
 #table(
-  columns: (auto, 1.5fr, 1fr),
-  align: (center, left, left),
+  columns: 3,
   table.header([*ID*], [*Change*], [*State*]),
   [PR #16], [GNC node implementation from DLQR reference], [Merged],
   [PR #17], [Env node unit tests added and integrated], [Merged],
@@ -81,8 +79,7 @@ When the simulation _can_ be wrapped in ROS 2, all components live inside the RO
 == ROS 2 Component Mapping
 
 #table(
-  columns: (auto, 1fr),
-  align: (left, left),
+  columns: 2,
   table.header([*Component*], [*Role*]),
   [Env Node], [Executes simulation software (orbital mechanics, actuator models)],
   [GNC Node], [Navigation, Guidance, and Control — ported from DLQR on NJON],
@@ -116,8 +113,7 @@ Current implemented control loop:
 == Implementation Status
 
 #table(
-  columns: (1fr, 1fr),
-  align: (left, left),
+  columns: 2,
   table.header([*Implemented*], [*Planned / Not Yet Programmed*]),
   [
     - Env and GNC ROS 2 nodes
@@ -154,15 +150,16 @@ Current test plan for software validation:
 
 = Issues and Strategies
 
+/* problem with this table
 #table(
-  columns: (1.2fr, 1.6fr, 1fr),
-  align: (left, left, left),
+  columns: 3,
   table.header([*Issue*], [*Strategy*], [*Status*]),
   [CMake merge conflict while parallel feature work], [Merge `main` into feature branch early; preserve both env and gnc targets during conflict resolution], [Mitigated],
   [Hard to locate complete legacy C++ file set], [Cross-check NJON + Desktop sources and coordinate with STAR C&C team], [Ongoing],
   [Cross-platform devcontainer instability], [Adopt OS-specific/runtime-safe rosdep flow and update workflows], [Mitigated],
   [Lab hardware Docker/network constraints], [Collect diagnostics first, avoid disruptive host changes until coordinated], [Ongoing],
 )
+*/
 
 = Individual Responsibilities
 
