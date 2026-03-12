@@ -148,7 +148,7 @@ Current test plan for software validation:
 - *Integration checks* (#5): launch-level tests to verify multi-node behavior in real startup flow
 - *Definition of done for this phase*: issues #10 and #11 closed with reproducible results in CI
 
-= Issues and Strategies
+// = Issues and Strategies
 
 /* problem with this table
 #table(
@@ -160,6 +160,13 @@ Current test plan for software validation:
   [Lab hardware Docker/network constraints], [Collect diagnostics first, avoid disruptive host changes until coordinated], [Ongoing],
 )
 */
+
+== Near-Term Goals (Next 1-2 Weeks)
+
+- Close PR #20 and finalize remaining validation issues (#10, #11)
+- Produce a repeatable demo runbook for project functionality demonstration
+- Begin implementation planning for QP\_MPC mode and deployment-image workflow
+- Keep scope focused on validated, demo-ready behavior before adding UI/HIL expansions
 
 = Individual Responsibilities
 
@@ -177,10 +184,3 @@ Current test plan for software validation:
 
 - Completed: infrastructure support, CI/devcontainer reliability, validation coordination with STAR lab
 - Next: drive closure of #10 and #11 and prepare deployment-image path (#18)
-
-= Near-Term Goals (Next 1-2 Weeks)
-
-- Close PR #20 and finalize remaining validation issues (#10, #11)
-- Produce a repeatable demo runbook for project functionality demonstration
-- Begin implementation planning for QP\_MPC mode and deployment-image workflow
-- Keep scope focused on validated, demo-ready behavior before adding UI/HIL expansions
