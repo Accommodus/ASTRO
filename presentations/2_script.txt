@@ -1,0 +1,70 @@
+ASTRO Presentation 2 Script
+Target length: about 6 to 7 minutes
+
+Title Slide
+Person 1:
+"Good [morning/afternoon]. We are presenting ASTRO, which stands for Autonomous Satellite Test and Robotics Operations. Since our last presentation, we have moved from architecture planning into implementation and validation. Our focus has been building a ROS 2 version of the lab's existing DLQR simulation and control workflow, and then proving that it behaves correctly."
+
+Progress Update - Requirements, Backlog, and Project Plan
+Person 1:
+"Our project goals have stayed consistent with the original proposal. We want a modular simulation engine, a modular flight software engine, and a bridge that can support communication across machines. In this phase, the main change is that we now have the core ROS 2 path implemented for the Environment and GNC nodes, and we have shifted more of our effort toward software validation rather than only setup work."
+
+Progress Update - GitHub Progress Since Presentation 1
+Person 1:
+"Since our first presentation on February 15th, we have merged several major pieces of work. The GNC node implementation is merged, the Env node unit tests are merged, and we also merged development-environment and workflow improvements that made the project easier to build and manage. In addition, the GNC unit-test work and the trajectory-comparison validation work are both implemented and waiting on final teammate review."
+
+Project Walk-Through - External Sim
+Person 2:
+"This slide shows the fallback external architecture. If a simulation cannot be wrapped directly as a ROS 2 node, we can place an adapter between that simulation and the ROS graph so it still participates in the same overall system."
+
+Project Walk-Through - Internal ROS 2
+Person 2:
+"This internal architecture is the path we are implementing first. Here, the simulation and control components live directly inside the ROS 2 graph as native nodes, which gives us cleaner testing, launch, and debugging."
+
+Project Walk-Through - ROS 2 Component Mapping
+Person 2:
+"The two main nodes are the Environment node and the GNC node. The Environment node publishes the system state, and the GNC node consumes that state and produces the control command. In other words, this is the core closed-loop ROS 2 path we have now implemented."
+
+Project Walk-Through - Functional Data and Control Path
+Person 2:
+"This slide shows the implemented control loop. The Environment node publishes state, the GNC node computes the DLQR control action from that state, and the result is returned through the ROS 2 interface. The key point is that we replaced the previous ad hoc UDP coupling with a ROS-native control path."
+
+Project Walk-Through - Validation and End-to-End Demo
+Person 2:
+"This is the most important slide in the presentation. Our demo is the ROS 2 closed-loop system running end to end: launching the Environment and GNC nodes together, producing the control trajectory, and showing that it matches the expected reference behavior. The launch flow is exercised through sim.launch.py, and the recorded ROS 2 trajectory is compared against a committed reference trajectory from the original implementation. That means our progress is no longer just architectural. We now have executable validation that is waiting on final teammate review."
+
+Project Walk-Through - Implementation Status
+Person 3:
+"At this point, the main implemented pieces are the Env node, the GNC node, the DLQR control path, merged Env tests, and the workflow infrastructure around the project. The main work still in front of us is not fresh implementation from scratch. It is final review and merge of the open validation pull requests, closure of the umbrella DLQR validation milestone, and then selecting the most valuable direction for the next phase."
+
+Test Plan - Completed Testing and Validation Work
+Person 3:
+"For completed testing, the Env node already has merged unit tests covering state initialization, thrust behavior, service behavior, and topic publication. We also have the GNC unit-test work implemented, and we have the launch-based trajectory-comparison validation work implemented. So our test plan now has three layers: merged tests, implemented tests under review, and then milestone closure once that review path is complete."
+
+Test Plan - Validation In Progress and Exit Criteria
+Person 3:
+"Our exit criteria for this phase are straightforward. First, the review-stage validation work needs to be approved and merged. Second, that test path needs to stand as the accepted reproducible baseline for the DLQR scenario. Once that is done, the remaining validation milestone can be closed. Broader integration and multi-machine checks remain an important next layer, but they are beyond the minimum validation bar for this phase."
+
+Issues and Strategies
+Person 3:
+"The biggest issues we dealt with were merge conflicts during parallel development, cross-platform development environment instability, and the fact that the legacy reference code is spread across multiple sources. Our strategy has been to stabilize the tooling, preserve both major node paths when resolving conflicts, and work from the latest tracked source set first so we can wrap the right behavior in ROS 2 before refining it further. Right now, the main active issue is simply getting the already-implemented validation work through final team review."
+
+Possible High-Impact Next Steps After Validation
+Person 1:
+"After validation closes, we have three strong next-step options, and we have not locked that down yet. One is defining a universal controller interface so DLQR and QP_MPC can both fit cleanly into the same ROS 2 framework. Another is rosifying more of the underlying system to add higher-fidelity models and richer state inputs. The third is building operator tooling around telemetry monitoring, fault detection logic, and queryable logging. Our advisor was supportive of all three directions, so the main decision is which one gives the highest impact next."
+
+Individual Responsibilities - Person 1
+Person 1:
+"My contribution in this phase has been the Environment node, testing support, workflow automation, and repository operations. My immediate next step is helping get the reference-comparison validation work through review and assisting with closure of the remaining DLQR validation milestone."
+
+Individual Responsibilities - Person 2
+Person 2:
+"My contribution in this phase has been the GNC node implementation and the control-side testing path. My immediate next step is finalizing review of the GNC unit-test work and confirming that the controller behavior matches the accepted baseline output."
+
+Individual Responsibilities - Person 3
+Person 3:
+"My contribution in this phase has been infrastructure support, development environment reliability, and coordination around validation and project direction. My immediate next step is helping drive closure of the validation milestone and helping the team choose the highest-impact direction for the next stage of the project."
+
+Closing
+Person 1:
+"To conclude, ASTRO is moving from a legacy UDP-based testing setup toward a modular ROS 2 framework for satellite simulation and control. Since the last presentation, we moved from architecture planning to a working ROS 2 DLQR path with executable validation against the legacy reference. Our immediate goal is to finish review and lock that in as the baseline."

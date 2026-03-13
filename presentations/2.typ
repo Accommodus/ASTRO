@@ -42,7 +42,7 @@ From our proposal and backlog, we focused this phase on finalizing core implemen
   table.header([*Backlog / Milestone Item*], [*Status*], [*Evidence / Next Step*]),
   [Modular simulation + flight software engines], [In Progress], [ROS 2 Env + GNC node path implemented and integrated],
   [Bridge across machines], [In Progress], [Current ROS 2 graph operational; CI/CD deployment image issue remains open (#18)],
-  [Software validation], [In Progress], [Env tests (#9) and GNC tests (#8) closed; comparison + full suite still open (#10, #11)],
+  [Software validation], [In Progress], [Env tests merged; PR #20 and PR #21 implemented and awaiting review; final validation closure remains under #11],
   [UI and operator tooling], [Planned], [CLI/logging path active; dashboard-level UI remains a next milestone],
   [Hardware-in-the-loop expansion], [Planned], [Deferred until validation closes and baseline behavior is stable],
 )
@@ -57,9 +57,10 @@ From our proposal and backlog, we focused this phase on finalizing core implemen
   [PR #14], [Devcontainer rosdep and OS-specific setup fixes], [Merged],
   [PR #15], [Issue/branch tracking GitHub workflows], [Merged],
   [PR #19], [Project README documentation], [Merged],
-  [PR #20], [GNC node unit tests], [Open],
-  [Issues #8, #9], [Unit test tracks for GNC and Env], [Closed],
-  [Issues #10, #11, #18], [Comparison suite, DLQR test completion, CI/CD image], [Open],
+  [PR #20], [GNC node unit tests implemented], [Open for Review],
+  [PR #21], [ROS 2 vs reference trajectory launch test implemented], [Open for Review],
+  [Issues #8, #9], [Unit test tracks for GNC and Env], [Closed / Implemented],
+  [Issues #10, #11], [Reference comparison and DLQR validation closure], [In Review / Open],
 )
 
 = Project Walk-Through
@@ -87,12 +88,6 @@ When the simulation _can_ be wrapped in ROS 2, all components live inside the RO
   [`actuation_cmd` Service], [Control signals sent from GNC to the environment],
 )
 
-== User Interface Design
-
-ROS 2 exposes system data through topics, services, and logging — accessible via CLI, dashboards, and plotting tools.
-
-#align(center, scale(65%, ui-arch))
-
 == Functional Data and Control Path
 
 Current implemented control loop:
@@ -110,6 +105,26 @@ Current implemented control loop:
   edge((2, 0), (4, 0), "->", label: [actuation_cmd]),
 )))
 
+== Validation and End-to-End Demo
+
+Current closed-loop validation path now exercises the real launch flow:
+
+- Our demo is the ROS 2 closed-loop system running end to end: launching Env and GNC together, producing the control trajectory, and showing that it matches the expected reference behavior
+- `sim.launch.py` starts the Env and GNC nodes together
+- PR #20 adds the GNC unit-test layer and exposes the control node for test coverage
+- PR #21 records the ROS 2 closed-loop trajectory and compares it to a committed reference fixture
+- Together, these changes turn the demo from architecture-only into an executable validation path pending final teammate review
+
+#align(center, scale(75%, diagram(
+  node((0, 0), [Reference Trajectory CSV]),
+  node((2, 0), [launch_testing Recorder]),
+  node((2, 1.5), [sim.launch.py]),
+  node((4, 1.5), [Env + GNC Nodes]),
+  edge((2, 1.5), (4, 1.5), "->", label: [launch]),
+  edge((4, 1.5), (2, 0), "->", label: [env_data trace]),
+  edge((0, 0), (2, 0), "->", label: [expected trajectory]),
+)))
+
 == Implementation Status
 
 #table(
@@ -118,14 +133,15 @@ Current implemented control loop:
   [
     - Env and GNC ROS 2 nodes
     - Core DLQR control path
-    - Unit-test infrastructure in ROS 2 package
+    - Env unit tests merged into main
+    - GNC unit tests + trajectory comparison implemented in open review
     - CI issue/branch automation workflow
   ],
   [
-    - QP\_MPC controller integration (#6)
-    - Full ROS2 vs reference output closure (#10)
-    - Meta DLQR test suite closure (#11)
-    - CI/CD deployment image for distributed sim (#18)
+    - Final review and merge of PR #20 and PR #21
+    - Validation milestone closure under issue #11
+    - Universal GNC interface / selectable controller path (#6)
+    - Future deployment image for distributed sim (#18)
   ],
 )
 
@@ -135,52 +151,50 @@ Current implemented control loop:
 
 Completed this cycle:
 
-- Env node unit tests merged: `ZeroThrust`, `NonZeroThrust`, `DefaultInitialState`, `ServiceReturnsSuccess`, `TopicPublishesCorrectSize`
-- GNC node implementation merged and unit-test track closed
+- Env node unit tests merged, covering initialization, thrust behavior, service behavior, and topic publication
+- GNC unit-test work implemented and pending final review
+- ROS 2 vs reference trajectory comparison implemented and pending final review
 - Build/dev environment stabilized across Linux/macOS/Windows devcontainer workflows
 
 == Validation In Progress and Exit Criteria
 
 Current test plan for software validation:
 
-- *Output equivalence* (#10): ROS 2 package trajectory and control output must match reference implementation within defined tolerance
-- *DLQR suite completion* (#11): close remaining test cases and regression checks in a single suite
-- *Integration checks* (#5): launch-level tests to verify multi-node behavior in real startup flow
-- *Definition of done for this phase*: issues #10 and #11 closed with reproducible results in CI
+- *Merged test layer*: Env node unit tests are already merged into `main`
+- *Implemented / open-review test layer*: GNC unit tests and launch-based trajectory comparison are both implemented and awaiting review
+- *Validation umbrella*: closes once that test work is reviewed, merged, and accepted as the reproducible DLQR baseline
+- *Integration checks*: launch-level and eventual multi-machine verification remain the broader next validation layer
 
-// = Issues and Strategies
+== Issues and Strategies
 
-/* problem with this table
 #table(
   columns: 3,
   table.header([*Issue*], [*Strategy*], [*Status*]),
   [CMake merge conflict while parallel feature work], [Merge `main` into feature branch early; preserve both env and gnc targets during conflict resolution], [Mitigated],
-  [Hard to locate complete legacy C++ file set], [Cross-check NJON + Desktop sources and coordinate with STAR C&C team], [Ongoing],
+  [Reference code spread across multiple legacy sources], [Use the latest tracked source set and wrap it in ROS 2 first; refine against newer upstream revisions later], [Managed],
   [Cross-platform devcontainer instability], [Adopt OS-specific/runtime-safe rosdep flow and update workflows], [Mitigated],
-  [Lab hardware Docker/network constraints], [Collect diagnostics first, avoid disruptive host changes until coordinated], [Ongoing],
+  [Open validation PRs still awaiting final teammate review], [Present them as implemented validation work now and close review/merge promptly after team signoff], [In Progress],
 )
-*/
 
-== Near-Term Goals (Next 1-2 Weeks)
+== Possible High-Impact Next Steps After Validation
 
-- Close PR #20 and finalize remaining validation issues (#10, #11)
-- Produce a repeatable demo runbook for project functionality demonstration
-- Begin implementation planning for QP\_MPC mode and deployment-image workflow
-- Keep scope focused on validated, demo-ready behavior before adding UI/HIL expansions
+- *Validation + universal GNC interface*: finish DLQR validation and define a clean selectable controller interface
+- *Higher-fidelity rosified models*: port more of the existing system into ROS 2 with richer state inputs and dynamics
+- *Operator tooling + telemetry/FDC*: add monitoring, fault response logic, and queryable circular-buffer logging
 
 = Individual Responsibilities
 
 == Dylan — SCRUM Master
 
 - Completed: Env node and testing support, workflow/process automation, repository operations
-- Next: close open GNC test PR and support comparison-test closure (#10)
+- Next: shepherd PR #21 review/merge and help close the remaining DLQR validation milestone (#11)
 
 == Caleb — Backend Developer
 
-- Completed: GNC node implementation merged from DLQR reference path
-- Next: support QP\_MPC integration track and verify control behavior against baseline output
+- Completed: GNC node implementation merged from DLQR reference path; GNC unit tests implemented in PR #20
+- Next: finalize review of PR #20 and verify controller behavior against the accepted baseline output
 
 == Cannon — Project Manager
 
 - Completed: infrastructure support, CI/devcontainer reliability, validation coordination with STAR lab
-- Next: drive closure of #10 and #11 and prepare deployment-image path (#18)
+- Next: drive closure of #11 and help the team choose the highest-impact post-validation direction
