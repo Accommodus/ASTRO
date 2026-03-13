@@ -11,16 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Entry point for the GNC Node.
 
-#include "distributed_satellite_sim/gnc_node.hpp"
+#ifndef TEST_GNC_NODE_HPP_
+#define TEST_GNC_NODE_HPP_
 
-int main(int argc, char * argv[])
-{
-  rclcpp::init(argc, argv);
-  auto node = std::make_shared<distributed_satellite_sim::GncNode>();
-  rclcpp::spin(node);
-  rclcpp::shutdown();
-  return 0;
-}
+// This header is intentionally minimal. It exists to satisfy cpplint's
+// expectation that the test translation unit's corresponding header
+// (test_gnc_node.hpp) is included first.
+
+#endif  // TEST_GNC_NODE_HPP_
