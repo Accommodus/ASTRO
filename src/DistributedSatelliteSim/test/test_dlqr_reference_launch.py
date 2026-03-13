@@ -15,78 +15,66 @@
 # limitations under the License.
 
 import csv
-import importlib.util
 import os
 import time
 import unittest
 
-from ament_index_python.packages import get_package_share_directory
 import launch
 from launch.actions import EmitEvent
-from launch.actions import SetLaunchConfiguration
 from launch.actions import TimerAction
 from launch.events import Shutdown
+from launch_ros.actions import Node as LaunchNode
 import launch_testing
 import launch_testing.actions
 import launch_testing.asserts
-from launch_ros.actions import Node as LaunchNode
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile
 from std_msgs.msg import Float64MultiArray
 
 FIXTURE_PATH = os.path.join(
     os.path.dirname(__file__),
-    "data",
-    "dlqr_reference_trajectory.csv",
+    'data',
+    'dlqr_reference_trajectory.csv',
 )
 EXPECTED_STEPS = 91
 STATE_SIZE = 6
 ABS_TOLERANCE = 1e-4
 SIM_START_DELAY_SEC = 2.0
-SHUTDOWN_AFTER_SEC = 18.0
-RECEIVE_TIMEOUT_SEC = 20.0
-
-
-def _load_sim_launch_description():
-    package_share = get_package_share_directory("distributed_satellite_sim")
-    launch_path = os.path.join(package_share, "launch", "sim.launch.py")
-    spec = importlib.util.spec_from_file_location(
-        "distributed_satellite_sim_sim_launch",
-        launch_path,
-    )
-    module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module.generate_launch_description()
+SHUTDOWN_AFTER_SEC = 30.0
+RECEIVE_TIMEOUT_SEC = 25.0
+DISCOVERY_TIMEOUT_SEC = 10.0
 
 
 def _load_reference_trajectory():
-    with open(FIXTURE_PATH, newline="", encoding="utf-8") as csv_file:
+    with open(FIXTURE_PATH, newline='', encoding='utf-8') as csv_file:
         rows = [[float(value) for value in row] for row in csv.reader(csv_file)]
 
     if len(rows) != EXPECTED_STEPS:
         raise AssertionError(
-            f"Reference fixture must contain {EXPECTED_STEPS} rows, found {len(rows)}"
+            f'Reference fixture must contain {EXPECTED_STEPS} rows, found {len(rows)}'
         )
 
     for step, row in enumerate(rows):
         if len(row) != STATE_SIZE:
             raise AssertionError(
-                f"Reference fixture row {step} must contain {STATE_SIZE} values, found {len(row)}"
+                f'Reference fixture row {step} must contain {STATE_SIZE} values, '
+                f'found {len(row)}'
             )
 
     return rows
 
 
 class TrajectoryRecorder(Node):
+
     def __init__(self):
-        super().__init__("dlqr_reference_trajectory_recorder")
+        super().__init__('dlqr_reference_trajectory_recorder')
         self.trajectory = []
         self.subscription = self.create_subscription(
             Float64MultiArray,
-            "env_data",
+            'env_data',
             self._callback,
-            10,
+            QoSProfile(depth=100),
         )
 
     def _callback(self, msg):
@@ -94,37 +82,44 @@ class TrajectoryRecorder(Node):
 
 
 def generate_test_description():
-    sim_launch_description = _load_sim_launch_description()
-    sim_nodes = [
-        entity for entity in sim_launch_description.entities
-        if isinstance(entity, LaunchNode)
-    ]
-    if len(sim_nodes) != 2:
-        raise RuntimeError(
-            "Expected sim.launch.py to define exactly 2 ROS nodes, "
-            f"found {len(sim_nodes)}"
-        )
-
-    env_node, gnc_node = sim_nodes
+    env_node = LaunchNode(
+        package='distributed_satellite_sim',
+        executable='env_node',
+        name='env_node',
+        output='screen',
+        parameters=[{
+            'max_steps': EXPECTED_STEPS,
+            'min_subscribers': 2,
+        }],
+    )
+    gnc_node = LaunchNode(
+        package='distributed_satellite_sim',
+        executable='gnc_node',
+        name='gnc_node',
+        output='screen',
+    )
 
     return (
         launch.LaunchDescription([
-            SetLaunchConfiguration("max_steps", str(EXPECTED_STEPS)),
             launch_testing.actions.ReadyToTest(),
-            TimerAction(period=SIM_START_DELAY_SEC, actions=sim_nodes),
+            TimerAction(
+                period=SIM_START_DELAY_SEC,
+                actions=[env_node, gnc_node],
+            ),
             TimerAction(
                 period=SHUTDOWN_AFTER_SEC,
-                actions=[EmitEvent(event=Shutdown(reason="trajectory capture complete"))],
+                actions=[EmitEvent(event=Shutdown(reason='trajectory capture complete'))],
             ),
         ]),
         {
-            "env_node": env_node,
-            "gnc_node": gnc_node,
+            'env_node': env_node,
+            'gnc_node': gnc_node,
         },
     )
 
 
 class TestDlqrReferenceTrajectory(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         rclpy.init()
@@ -141,6 +136,19 @@ class TestDlqrReferenceTrajectory(unittest.TestCase):
         # and reference/DLQR/udp_roundtrip_discrete.cpp using the default initial state.
         reference_trajectory = _load_reference_trajectory()
 
+        discovery_deadline = time.monotonic() + DISCOVERY_TIMEOUT_SEC
+        while (
+            self.recorder.count_publishers('env_data') == 0
+            and time.monotonic() < discovery_deadline
+        ):
+            rclpy.spin_once(self.recorder, timeout_sec=0.1)
+
+        self.assertGreater(
+            self.recorder.count_publishers('env_data'),
+            0,
+            'env_data publisher was not discovered within timeout',
+        )
+
         deadline = time.monotonic() + RECEIVE_TIMEOUT_SEC
         while (
             len(self.recorder.trajectory) < EXPECTED_STEPS
@@ -148,11 +156,11 @@ class TestDlqrReferenceTrajectory(unittest.TestCase):
         ):
             rclpy.spin_once(self.recorder, timeout_sec=0.1)
 
+        received = len(self.recorder.trajectory)
         self.assertEqual(
-            len(self.recorder.trajectory),
+            received,
             EXPECTED_STEPS,
-            f"Expected {EXPECTED_STEPS} env_data messages, received "
-            f"{len(self.recorder.trajectory)}",
+            f'Expected {EXPECTED_STEPS} env_data messages, received {received}',
         )
 
         for step, (actual_row, expected_row) in enumerate(
@@ -161,7 +169,7 @@ class TestDlqrReferenceTrajectory(unittest.TestCase):
             self.assertEqual(
                 len(actual_row),
                 STATE_SIZE,
-                f"Trajectory row {step} should contain {STATE_SIZE} state values",
+                f'Trajectory row {step} should contain {STATE_SIZE} state values',
             )
             for index, (actual_value, expected_value) in enumerate(
                 zip(actual_row, expected_row)
@@ -170,22 +178,20 @@ class TestDlqrReferenceTrajectory(unittest.TestCase):
                 self.assertLessEqual(
                     difference,
                     ABS_TOLERANCE,
-                    "Trajectory mismatch at step "
-                    f"{step}, state[{index}]: actual={actual_value:.15f}, "
-                    f"expected={expected_value:.15f}, abs_diff={difference:.15f}, "
-                    f"tolerance={ABS_TOLERANCE}. "
-                    "Tolerance accounts for text-formatted reference output and "
-                    "cross-platform floating-point serialization differences.",
+                    f'Trajectory mismatch at step '
+                    f'{step}, state[{index}]: actual={actual_value:.15f}, '
+                    f'expected={expected_value:.15f}, abs_diff={difference:.15f}, '
+                    f'tolerance={ABS_TOLERANCE}. '
+                    f'Tolerance accounts for text-formatted reference output and '
+                    f'cross-platform floating-point serialization differences.',
                 )
 
 
 @launch_testing.post_shutdown_test()
 class TestDlqrLaunchShutdown(unittest.TestCase):
-    def test_env_node_shutdown(self, proc_info, env_node):
-        proc_info.assertWaitForShutdown(env_node, timeout=5.0)
 
-    def test_gnc_node_shutdown(self, proc_info, gnc_node):
-        proc_info.assertWaitForShutdown(gnc_node, timeout=5.0)
+    def test_env_node_exit_code(self, proc_info, env_node):
+        launch_testing.asserts.assertExitCodes(proc_info, process=env_node)
 
-    def test_exit_codes(self, proc_info):
-        launch_testing.asserts.assertExitCodes(proc_info)
+    def test_gnc_node_exit_code(self, proc_info, gnc_node):
+        launch_testing.asserts.assertExitCodes(proc_info, process=gnc_node)

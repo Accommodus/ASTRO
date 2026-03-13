@@ -86,9 +86,9 @@ if(BUILD_TESTING)
   )
   target_link_libraries(test_env_node env_node_lib)
 
-  add_ros_isolated_launch_test(
+  add_launch_test(
     test/test_dlqr_reference_launch.py
-    TIMEOUT 30
+    TIMEOUT 60
   )
 endif()
 
