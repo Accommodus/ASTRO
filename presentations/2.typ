@@ -16,7 +16,7 @@ From our proposal and backlog, we focused this phase on finalizing core implemen
   [Modular simulation + flight software engines], [In Progress], [ROS 2 Env + GNC node path implemented and integrated],
   [Bridge across machines],
   [In Progress],
-  [Current ROS 2 graph operational; CI/CD deployment image issue remains open (#18)],
+  [Graph operational; CI/CD deployment image issue remains open (#18)],
 
   [Software validation],
   [In Progress],
