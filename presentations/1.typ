@@ -1,35 +1,7 @@
-#import "@preview/touying:0.6.1": *
-#import themes.university: *
-#import "@preview/numbly:0.1.0": numbly
-#import "@preview/fletcher:0.5.8" as fletcher: diagram, edge, node
+#import "style.typ": presentation
 #import "diagrams.typ": external-arch, internal-arch, ui-arch
 
-#set table(stroke: 0.5pt, inset: 0.6em)
-
-#let fletcher-diagram = touying-reducer.with(
-  reduce: fletcher.diagram,
-  cover: fletcher.hide,
-)
-
-#show: university-theme.with(
-  aspect-ratio: "16-9",
-  config-info(
-    title: [ASTRO],
-    subtitle: [Autonomous Satellite Test & Robotics Operations],
-    author: [Cannon Whitney, Dylan Long, Caleb Jackson],
-    date: datetime.today(),
-    logo: none,
-  ),
-  config-colors(
-    primary: rgb("#04364A"),
-    secondary: rgb("#176B87"),
-    tertiary: rgb("#448C95"),
-  ),
-)
-
-#set heading(numbering: numbly("{1}.", default: "1.1"))
-
-#title-slide(authors: ([Cannon Whitney], [Dylan Long], [Caleb Jackson]))
+#show: presentation
 
 = Project Overview
 

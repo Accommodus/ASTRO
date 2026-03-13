@@ -1,5 +1,8 @@
 #import "@preview/fletcher:0.5.8" as fletcher: diagram, edge, node
 
+#set block(spacing: 0pt)
+#set par(spacing: 0pt, leading: 0pt)
+
 // Color Palette
 #let palette = (
   sim: (
@@ -149,6 +152,7 @@
       shift: parallel-shift, label-side: right)
   },
 )
+#external-arch
 
 // Internal Architecture (All-in-ROS2)
 
@@ -180,12 +184,12 @@
       [`actuation_cmd` Service])
   },
 )
+#internal-arch
 
 // User Interface Design
 
 #let ui-arch = diagram(
   ..diagram-attrs,
-  spacing: (2.5em, 1.8em),
   {
     // Core ROS2 System
     group((1, 0), [ROS2 Backend], (
@@ -211,4 +215,4 @@
     labeled-edge(<topics>, <viz>, "->", [Real-time Data])
   },
 )
-
+#ui-arch

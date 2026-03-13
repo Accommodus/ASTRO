@@ -1,35 +1,8 @@
-#import "@preview/touying:0.6.1": *
-#import themes.university: *
-#import "@preview/numbly:0.1.0": numbly
-#import "@preview/fletcher:0.5.8" as fletcher: diagram, edge, node
-#import "diagrams.typ": external-arch, internal-arch, ui-arch
+#import "style.typ": presentation, text-diagram
+#import "diagrams.typ": external-arch, internal-arch
+#import "@preview/fletcher:0.5.8": *
 
-#set table(stroke: 0.5pt, inset: 0.6em)
-
-#let fletcher-diagram = touying-reducer.with(
-  reduce: fletcher.diagram,
-  cover: fletcher.hide,
-)
-
-#show: university-theme.with(
-  aspect-ratio: "16-9",
-  config-info(
-    title: [ASTRO],
-    subtitle: [Autonomous Satellite Test & Robotics Operations],
-    author: [Cannon Whitney, Dylan Long, Caleb Jackson],
-    date: datetime.today(),
-    logo: none,
-  ),
-  config-colors(
-    primary: rgb("#04364A"),
-    secondary: rgb("#176B87"),
-    tertiary: rgb("#448C95"),
-  ),
-)
-
-#set heading(numbering: numbly("{1}.", default: "1.1"))
-
-#title-slide(authors: ([Cannon Whitney], [Dylan Long], [Caleb Jackson]))
+#show: presentation
 
 = Progress Update
 
@@ -41,8 +14,14 @@ From our proposal and backlog, we focused this phase on finalizing core implemen
   columns: 3,
   table.header([*Backlog / Milestone Item*], [*Status*], [*Evidence / Next Step*]),
   [Modular simulation + flight software engines], [In Progress], [ROS 2 Env + GNC node path implemented and integrated],
-  [Bridge across machines], [In Progress], [Current ROS 2 graph operational; CI/CD deployment image issue remains open (#18)],
-  [Software validation], [In Progress], [Env tests merged; PR #20 and PR #21 implemented and awaiting review; final validation closure remains under #11],
+  [Bridge across machines],
+  [In Progress],
+  [Current ROS 2 graph operational; CI/CD deployment image issue remains open (#18)],
+
+  [Software validation],
+  [In Progress],
+  [Env tests merged; PR #20 and PR #21 implemented and awaiting review; final validation closure remains under #11],
+
   [UI and operator tooling], [Planned], [CLI/logging path active; dashboard-level UI remains a next milestone],
   [Hardware-in-the-loop expansion], [Planned], [Deferred until validation closes and baseline behavior is stable],
 )
@@ -67,15 +46,17 @@ From our proposal and backlog, we focused this phase on finalizing core implemen
 
 == External Sim
 
-When the simulation environment cannot be wrapped as a ROS 2 node, a bridge adapter translates simulation data and ROS messages.
-
-#align(center, scale(50%, external-arch))
+#text-diagram(
+  [When the simulation environment cannot be wrapped as a ROS 2 node, a bridge adapter translates simulation data and ROS messages.],
+  external-arch,
+)
 
 == Internal ROS 2
 
-When the simulation _can_ be wrapped in ROS 2, all components live inside the ROS 2 graph as native nodes.
-
-#align(center, scale(60%, internal-arch))
+#text-diagram(
+  [When the simulation _can_ be wrapped in ROS 2, all components live inside the ROS 2 graph as native nodes.],
+  internal-arch,
+)
 
 == ROS 2 Component Mapping
 
@@ -170,13 +151,24 @@ Current test plan for software validation:
 #table(
   columns: 3,
   table.header([*Issue*], [*Strategy*], [*Status*]),
-  [CMake merge conflict while parallel feature work], [Merge `main` into feature branch early; preserve both env and gnc targets during conflict resolution], [Mitigated],
-  [Reference code spread across multiple legacy sources], [Use the latest tracked source set and wrap it in ROS 2 first; refine against newer upstream revisions later], [Managed],
-  [Cross-platform devcontainer instability], [Adopt OS-specific/runtime-safe rosdep flow and update workflows], [Mitigated],
-  [Open validation PRs still awaiting final teammate review], [Present them as implemented validation work now and close review/merge promptly after team signoff], [In Progress],
+  [CMake merge conflict while parallel feature work],
+  [Merge `main` into feature branch early; preserve both env and gnc targets during conflict resolution],
+  [Mitigated],
+
+  [Reference code spread across multiple legacy sources],
+  [Use the latest tracked source set and wrap it in ROS 2 first; refine against newer upstream revisions later],
+  [Managed],
+
+  [Cross-platform devcontainer instability],
+  [Adopt OS-specific/runtime-safe rosdep flow and update workflows],
+  [Mitigated],
+
+  [Open validation PRs still awaiting final teammate review],
+  [Present them as implemented validation work now and close review/merge promptly after team signoff],
+  [In Progress],
 )
 
-== Possible High-Impact Next Steps After Validation
+== Possible Next Steps After Validation
 
 - *Validation + universal GNC interface*: finish DLQR validation and define a clean selectable controller interface
 - *Higher-fidelity rosified models*: port more of the existing system into ROS 2 with richer state inputs and dynamics
