@@ -26,6 +26,11 @@ def generate_launch_description():
         default_value='91',
         description='Number of simulation steps (0 = infinite)')
 
+    min_subscribers_arg = DeclareLaunchArgument(
+        'min_subscribers',
+        default_value='1',
+        description='Minimum number of env_data subscribers before advancing')
+
     env_node = Node(
         package='distributed_satellite_sim',
         executable='env_node',
@@ -33,6 +38,7 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'max_steps': LaunchConfiguration('max_steps'),
+            'min_subscribers': LaunchConfiguration('min_subscribers'),
         }],
     )
 
@@ -45,6 +51,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         max_steps_arg,
+        min_subscribers_arg,
         env_node,
         gnc_node,
     ])

@@ -32,7 +32,7 @@ public:
   : Node("env_node")
   {
     declare_parameter("max_steps", 91);
-    declare_parameter("min_subscribers", 1);
+    declare_parameter("min_subscribers", 0);
     max_steps_ = get_parameter("max_steps").as_int();
     min_subscribers_ = get_parameter("min_subscribers").as_int();
 

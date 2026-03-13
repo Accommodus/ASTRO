@@ -19,11 +19,13 @@ import os
 import time
 import unittest
 
+from ament_index_python.packages import get_package_share_directory
 import launch
 from launch.actions import EmitEvent
+from launch.actions import IncludeLaunchDescription
 from launch.actions import TimerAction
 from launch.events import Shutdown
-from launch_ros.actions import Node as LaunchNode
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 import launch_testing
 import launch_testing.actions
 import launch_testing.asserts
@@ -40,7 +42,6 @@ FIXTURE_PATH = os.path.join(
 EXPECTED_STEPS = 91
 STATE_SIZE = 6
 ABS_TOLERANCE = 1e-4
-SIM_START_DELAY_SEC = 2.0
 SHUTDOWN_AFTER_SEC = 30.0
 RECEIVE_TIMEOUT_SEC = 25.0
 DISCOVERY_TIMEOUT_SEC = 10.0
@@ -82,39 +83,27 @@ class TrajectoryRecorder(Node):
 
 
 def generate_test_description():
-    env_node = LaunchNode(
-        package='distributed_satellite_sim',
-        executable='env_node',
-        name='env_node',
-        output='screen',
-        parameters=[{
-            'max_steps': EXPECTED_STEPS,
-            'min_subscribers': 2,
-        }],
-    )
-    gnc_node = LaunchNode(
-        package='distributed_satellite_sim',
-        executable='gnc_node',
-        name='gnc_node',
-        output='screen',
+    package_share = get_package_share_directory('distributed_satellite_sim')
+    launch_path = os.path.join(package_share, 'launch', 'sim.launch.py')
+
+    sim_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(launch_path),
+        launch_arguments={
+            'max_steps': str(EXPECTED_STEPS),
+            'min_subscribers': '2',
+        }.items(),
     )
 
     return (
         launch.LaunchDescription([
             launch_testing.actions.ReadyToTest(),
-            TimerAction(
-                period=SIM_START_DELAY_SEC,
-                actions=[env_node, gnc_node],
-            ),
+            sim_launch,
             TimerAction(
                 period=SHUTDOWN_AFTER_SEC,
                 actions=[EmitEvent(event=Shutdown(reason='trajectory capture complete'))],
             ),
         ]),
-        {
-            'env_node': env_node,
-            'gnc_node': gnc_node,
-        },
+        {},
     )
 
 
@@ -190,8 +179,5 @@ class TestDlqrReferenceTrajectory(unittest.TestCase):
 @launch_testing.post_shutdown_test()
 class TestDlqrLaunchShutdown(unittest.TestCase):
 
-    def test_env_node_exit_code(self, proc_info, env_node):
-        launch_testing.asserts.assertExitCodes(proc_info, process=env_node)
-
-    def test_gnc_node_exit_code(self, proc_info, gnc_node):
-        launch_testing.asserts.assertExitCodes(proc_info, process=gnc_node)
+    def test_all_processes_exit_zero(self, proc_info):
+        launch_testing.asserts.assertExitCodes(proc_info)
