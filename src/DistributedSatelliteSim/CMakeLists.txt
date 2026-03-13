@@ -67,6 +67,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(launch_testing_ament_cmake REQUIRED)
 
   ament_add_gtest(test_gnc_node
     test/test_gnc_node.cpp
@@ -84,6 +85,11 @@ if(BUILD_TESTING)
     APPEND_LIBRARY_DIRS ${CMAKE_CURRENT_BINARY_DIR}
   )
   target_link_libraries(test_env_node env_node_lib)
+
+  add_ros_isolated_launch_test(
+    test/test_dlqr_reference_launch.py
+    TIMEOUT 30
+  )
 endif()
 
 ament_package()
