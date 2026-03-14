@@ -48,6 +48,11 @@ From our proposal and backlog, we focused this phase on finalizing core implemen
 - *Higher-fidelity rosified models*: port more of the existing system into ROS 2 with richer state inputs and dynamics
 - *Operator tooling + telemetry/FDC*: add monitoring, fault response logic, and queryable circular-buffer logging
 
+== Cannon — Project Manager
+
+- Completed: infrastructure support, CI/devcontainer reliability, validation coordination with STAR lab
+- Next: drive closure of #11 and help the team choose the highest-impact post-validation direction
+
 = Project Walk-Through
 
 == External Sim
@@ -132,6 +137,11 @@ Current closed-loop validation path now exercises the real launch flow:
   ],
 )
 
+== Dylan — SCRUM Master
+
+- Completed: Env node and testing support, workflow/process automation, repository operations
+- Next: shepherd PR #21 review/merge and help close the remaining DLQR validation milestone (#11)
+
 = Test Plan
 
 == Completed Testing and Validation Work
@@ -174,19 +184,9 @@ Current test plan for software validation:
   [In Progress],
 )
 
-= Individual Responsibilities
-
-== Cannon — Project Manager
-
-- Completed: infrastructure support, CI/devcontainer reliability, validation coordination with STAR lab
-- Next: drive closure of #11 and help the team choose the highest-impact post-validation direction
-
-== Dylan — SCRUM Master
-
-- Completed: Env node and testing support, workflow/process automation, repository operations
-- Next: shepherd PR #21 review/merge and help close the remaining DLQR validation milestone (#11)
-
 == Caleb — Backend Developer
 
 - Completed: GNC node implementation merged from DLQR reference path; GNC unit tests implemented in PR #20
 - Next: finalize review of PR #20 and verify controller behavior against the accepted baseline output
+
+= Closing
