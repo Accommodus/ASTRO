@@ -3,25 +3,23 @@
 #team-report(
   date: datetime(day: 13, month: 3, year: 2026),
   completed: [
-    - Env Node unit tests (issue #9, PR #17): extracted EnvNode to header, added ament_cmake_gtest and five test cases (ZeroThrust, NonZeroThrust, DefaultInitialState, ServiceReturnsSuccess, TopicPublishesCorrectSize).
-    - GNC Node implementation merged to main (issue #3, PR #16): DLQR control node with u = -K*x, actuation_cmd service, env_data subscription.
-    - GNC Node unit tests (issue #8): completed on branch 8-test-gnc-node-unit-tests and merged.
-    - Devcontainer fix (PR #14): rosdep update without sudo, sudo -E for rosdep install, restore build/install in .gitignore; OS-specific devcontainer configs (ROS2-linux, ROS2-macos, ROS2-Windows).
-    - GitHub Actions (PR #15): issue-branch workflow and track-issues workflow.
-    - Merge of main into feat/env-tests: resolved CMakeLists.txt conflict (env_node_lib + gnc_node both present).
+    - Merge test environment with unit tests (PR #17)
+    - Added README Document & Merged with Main (PR #19)
+    - GNC Node Unit tests updated (PR #20)
+    - ROS2 Reference Trajector Test for DLQR scenario with launch testing (PR #21)
   ],
   in-progress-list: (
     in-progress(
       due: datetime(month: 3, day: 14, year: 2026),
       notes: [Blocked on #8 and #9; both now merged. Prep or implementation.],
-      percent: [10%],
+      percent: [60%],
       person: [Cannon, Dylan, Caleb],
       task: [ROS2 vs reference comparison (issue #10)],
     ),
     in-progress(
       due: datetime(month: 3, day: 14, year: 2026),
       notes: [Closes when #8, #9, #10 are done],
-      percent: [75%],
+      percent: [90%],
       person: [Cannon, Dylan, Caleb],
       task: [Complete DLQR testing suite (issue #11)],
     ),
@@ -46,7 +44,7 @@
     issue-history(
       issue: [Difficult to find all C++ files for MPC-Sim],
       plan: [Inspect NJON + Desktop; Talk to C&C team at STAR lab],
-    )
+    ),
   ),
   next-meeting: datetime(day: 25, month: 3, year: 2026),
 )
