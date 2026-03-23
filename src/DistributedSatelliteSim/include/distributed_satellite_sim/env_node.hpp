@@ -32,7 +32,9 @@ public:
   : Node("env_node")
   {
     declare_parameter("max_steps", 91);
+    declare_parameter("min_subscribers", 0);
     max_steps_ = get_parameter("max_steps").as_int();
+    min_subscribers_ = get_parameter("min_subscribers").as_int();
 
     init_dynamics();
 
@@ -77,6 +79,13 @@ private:
 
   void timer_callback()
   {
+    if (!sim_started_) {
+      if (static_cast<int>(state_pub_->get_subscription_count()) < min_subscribers_) {
+        return;
+      }
+      sim_started_ = true;
+    }
+
     if (max_steps_ > 0 && step_ >= max_steps_) {
       timer_->cancel();
       RCLCPP_INFO(get_logger(), "Simulation complete after %d steps", step_);
@@ -114,6 +123,8 @@ private:
   Eigen::Vector3d u_now_;
   int step_ = 0;
   int max_steps_;
+  int min_subscribers_;
+  bool sim_started_ = false;
 
   Eigen::Matrix<double, 6, 6> Ad_;
   Eigen::Matrix<double, 6, 3> Bd_;
