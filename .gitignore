@@ -1,4 +1,5 @@
 log/
+*.log
 build/
 install/
 **/.DS_Store
