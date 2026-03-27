@@ -6,7 +6,7 @@ on:
     paths:
       - '.docker/distributed_satellite_sim.Dockerfile'
       - '.docker/distributed_satellite_sim.entrypoint.sh'
-      - 'src/DistributedSatelliteSim'
+      - 'src/DistributedSatelliteSim/**'
       - '.github/workflows/build-distributed-satellite-sim-image.yml'
   workflow_dispatch:
 
