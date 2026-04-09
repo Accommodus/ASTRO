@@ -2,7 +2,7 @@ name: Build and publish distributed_satellite_sim deployment image
 
 on:
   push:
-    branches: [31-cross-compile-docker-images]
+    branches: [main]
     paths:
       - '.docker/distributed_satellite_sim.Dockerfile'
       - '.docker/distributed_satellite_sim.entrypoint.sh'

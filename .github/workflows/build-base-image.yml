@@ -2,7 +2,7 @@ name: Build and publish base devcontainer image
 
 on:
   push:
-    branches: [31-cross-compile-docker-images]
+    branches: [main]
     paths:
       - '.devcontainer/base.Dockerfile'
       - '.github/workflows/build-base-image.yml'
