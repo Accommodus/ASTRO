@@ -26,68 +26,30 @@ if [[ -z "${ROS_DISCOVERY_PEER:-}" && "${_auto_peer}" != "0" && "${_auto_peer}" 
 fi
 
 if [[ -n "${ROS_DISCOVERY_PEER:-}" ]]; then
-  for _wait in $(seq 1 90); do
-    [[ -d /sys/class/net/tailscale0 ]] && break
-    sleep 1
-  done
-  if [[ ! -d /sys/class/net/tailscale0 ]]; then
-    echo "Error: ROS_DISCOVERY_PEER is set but network interface tailscale0 is missing after wait." >&2
-    exit 2
-  fi
-  # Wait until tailscale0 has a tailnet IPv4 (100.64.0.0/10); Cyclone binds early and hostname
-  # peers need working tailnet DNS, which may lag interface creation (see docker compose logs).
-  for _wait in $(seq 1 90); do
-    if ip -4 -o addr show dev tailscale0 2>/dev/null | grep -qE 'inet 100\.'; then
-      break
-    fi
-    sleep 1
-  done
-  if ! ip -4 -o addr show dev tailscale0 2>/dev/null | grep -qE 'inet 100\.'; then
-    echo "Error: tailscale0 has no 100.x tailnet address after wait; DDS cannot reach peers." >&2
-    exit 2
-  fi
-
-  peers_block=""
+  zenoh_endpoints=""
   IFS=',' read -ra _peer_addrs <<< "${ROS_DISCOVERY_PEER}"
   for _addr in "${_peer_addrs[@]}"; do
     _addr="${_addr#"${_addr%%[![:space:]]*}"}"
     _addr="${_addr%"${_addr##*[![:space:]]}"}"
     [[ -z "${_addr}" ]] && continue
-    if [[ ! "${_addr}" =~ ^[0-9A-Za-z._:\\-]+$ ]]; then
+    if [[ ! "${_addr}" =~ ^[0-9A-Za-z._:\-]+$ ]]; then
       echo "Error: invalid ROS_DISCOVERY_PEER component '${_addr}' (use IPs, hostnames, or IPv6)." >&2
       exit 2
     fi
-    peers_block+="        <Peer address=\"${_addr}\"/>\n"
+    if [[ -z "${zenoh_endpoints}" ]]; then
+      zenoh_endpoints="\"tcp/${_addr}:7447\""
+    else
+      zenoh_endpoints+=", \"tcp/${_addr}:7447\""
+    fi
   done
-  if [[ -z "${peers_block}" ]]; then
+  if [[ -z "${zenoh_endpoints}" ]]; then
     echo "Error: ROS_DISCOVERY_PEER is set but empty after parsing." >&2
     exit 2
   fi
 
-  _cyclone_xml="/tmp/cyclonedds_tailscale.xml"
-  _ros_dom="${ROS_DOMAIN_ID:-42}"
-  printf '%s\n' \
-    '<?xml version="1.0" encoding="UTF-8" ?>' \
-    '<CycloneDDS>' \
-    "  <Domain Id=\"${_ros_dom}\">" \
-    '    <General>' \
-    '      <Interfaces>' \
-    '        <NetworkInterface name="tailscale0" priority="default" multicast="false"/>' \
-    '      </Interfaces>' \
-    '      <AllowMulticast>false</AllowMulticast>' \
-    '    </General>' \
-    '    <Discovery>' \
-    '      <Peers>' \
-    "$(printf '%b' "${peers_block}")" \
-    '      </Peers>' \
-    '    </Discovery>' \
-    '  </Domain>' \
-    '</CycloneDDS>' > "${_cyclone_xml}"
-
-  export CYCLONEDDS_URI="file://${_cyclone_xml}"
-  export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-  unset ROS_AUTOMATIC_DISCOVERY_RANGE
-  echo "[distributed_satellite_sim] CycloneDDS Domain=${_ros_dom} peers=${ROS_DISCOVERY_PEER}" >&2
+  export RMW_IMPLEMENTATION=rmw_zenoh_cpp
+  export ZENOH_CONFIG_OVERRIDE="mode=\"peer\";scouting/multicast/enabled=false;listen/endpoints=[\"tcp/0.0.0.0:7447\"];connect/endpoints=[${zenoh_endpoints}]"
+  echo "[distributed_satellite_sim] rmw_zenoh_cpp peers: [${zenoh_endpoints}]" >&2
 fi
 
 source /astro_ws/install/setup.bash

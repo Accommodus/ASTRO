@@ -9,9 +9,9 @@ RUN . /opt/ros/kilted/setup.sh && \
     rosdep install --from-paths src --ignore-src -y && \
     colcon build --packages-select distributed_satellite_sim
 
-# Used when ROS_DISCOVERY_PEER is set (Tailscale / VPN: unicast DDS peers, no multicast).
+# Used when ROS_DISCOVERY_PEER is set (Tailscale / VPN: unicast peers, no multicast).
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-kilted-rmw-cyclonedds-cpp \
+    ros-kilted-rmw-zenoh-cpp \
   && rm -rf /var/lib/apt/lists/*
 
 # Role-aware entrypoint (starts only one node)
