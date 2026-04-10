@@ -34,6 +34,18 @@ if [[ -n "${ROS_DISCOVERY_PEER:-}" ]]; then
     echo "Error: ROS_DISCOVERY_PEER is set but network interface tailscale0 is missing after wait." >&2
     exit 2
   fi
+  # Wait until tailscale0 has a tailnet IPv4 (100.64.0.0/10); Cyclone binds early and hostname
+  # peers need working tailnet DNS, which may lag interface creation (see docker compose logs).
+  for _wait in $(seq 1 90); do
+    if ip -4 -o addr show dev tailscale0 2>/dev/null | grep -qE 'inet 100\.'; then
+      break
+    fi
+    sleep 1
+  done
+  if ! ip -4 -o addr show dev tailscale0 2>/dev/null | grep -qE 'inet 100\.'; then
+    echo "Error: tailscale0 has no 100.x tailnet address after wait; DDS cannot reach peers." >&2
+    exit 2
+  fi
 
   peers_block=""
   IFS=',' read -ra _peer_addrs <<< "${ROS_DISCOVERY_PEER}"

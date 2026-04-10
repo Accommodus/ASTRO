@@ -16,8 +16,9 @@
 # so the image uses Cyclone DDS unicast to the other node's Tailscale name (MagicDNS).
 # Defaults: TS_HOSTNAME astro-sim-env / astro-sim-gnc — ENV peers to GNC's name and vice versa.
 # Rename both sides consistently, e.g. TAILSCALE_SIM_NAME_ENV=my-env TAILSCALE_SIM_NAME_GNC=my-gnc
-# (must match each tailscale service's TS_HOSTNAME). Optional: ROS_DISCOVERY_PEER for IPs/extra
-# peers; ROS_AUTO_TAILSCALE_PEER=0 for multicast-only (single-host / no Cyclone peer config).
+# (must match each tailscale service's TS_HOSTNAME). ROS_DISCOVERY_PEER = the OTHER host's
+# 100.x tailnet IP (see admin console or `tailscale ip`) if names fail in-container.
+# ROS_AUTO_TAILSCALE_PEER=0 disables Cyclone peers (multicast-only, same host).
 #
 # Kernel TUN (TS_USERSPACE=false) needs Linux with /dev/net/tun. If that bind fails (some
 # Docker setups), set TS_USERSPACE=true and drop the /dev/net/tun volume on the tailscale
@@ -30,7 +31,9 @@ x-tailscale-common: &tailscale-common
     TS_STATE_DIR: /var/lib/tailscale
     TS_USERSPACE: ${TS_USERSPACE:-false}
     TS_AUTH_ONCE: ${TS_AUTH_ONCE:-true}
-    TS_EXTRA_ARGS: ${TS_EXTRA_ARGS:-}
+    # Containers often lack a working iptables filter table; Tailscale logs "can't initialize
+    # iptables table filter" and router stays unhealthy. This avoids netfilter in the sidecar.
+    TS_EXTRA_ARGS: ${TS_EXTRA_ARGS:---netfilter-mode=off}
   volumes:
     - /dev/net/tun:/dev/net/tun
   cap_add:
