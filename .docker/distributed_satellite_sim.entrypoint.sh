@@ -59,13 +59,16 @@ case "${ROLE}" in
     # EnvNode parameters (declared in env_node.hpp):
     # - max_steps (default 91 in sim.launch.py)
     # - min_subscribers (default 1 in sim.launch.py)
+    # - sim_rate_ms (default 100)
     MAX_STEPS="${MAX_STEPS:-91}"
     MIN_SUBSCRIBERS="${MIN_SUBSCRIBERS:-1}"
+    SIM_RATE_MS="${SIM_RATE_MS:-100}"
 
     exec ros2 run distributed_satellite_sim env_node \
       --ros-args \
       -p "max_steps:=${MAX_STEPS}" \
-      -p "min_subscribers:=${MIN_SUBSCRIBERS}"
+      -p "min_subscribers:=${MIN_SUBSCRIBERS}" \
+      -p "sim_rate_ms:=${SIM_RATE_MS}"
     ;;
   GNC)
     exec ros2 run distributed_satellite_sim gnc_node

@@ -33,8 +33,10 @@ public:
   {
     declare_parameter("max_steps", 91);
     declare_parameter("min_subscribers", 0);
+    declare_parameter("sim_rate_ms", 100);
     max_steps_ = get_parameter("max_steps").as_int();
     min_subscribers_ = get_parameter("min_subscribers").as_int();
+    int sim_rate_ms = get_parameter("sim_rate_ms").as_int();
 
     init_dynamics();
 
@@ -48,10 +50,10 @@ public:
       });
 
     timer_ = create_wall_timer(
-      std::chrono::milliseconds(100),
+      std::chrono::milliseconds(sim_rate_ms),
       std::bind(&EnvNode::timer_callback, this));
 
-    RCLCPP_INFO(get_logger(), "Env node started (max_steps=%d)", max_steps_);
+    RCLCPP_INFO(get_logger(), "Env node started (max_steps=%d, sim_rate_ms=%d)", max_steps_, sim_rate_ms);
   }
 
 private:

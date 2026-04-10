@@ -54,6 +54,7 @@ x-satellite-common: &satellite-common
     TAILSCALE_SIM_NAME_GNC: ${TS_HOSTNAME_GNC:-${TAILSCALE_SIM_NAME_GNC:-astro-sim-gnc}}
     MAX_STEPS: ${MAX_STEPS:-91}
     MIN_SUBSCRIBERS: ${MIN_SUBSCRIBERS:-1}
+    SIM_RATE_MS: ${SIM_RATE_MS:-100}
   restart: unless-stopped
 
 services:
