@@ -1,0 +1,94 @@
+# Tailscale sidecar + distributed_satellite_sim (ENV or GNC role).
+#
+# Matches the pattern from https://tailscale.com/docs/features/containers/docker/how-to/connect-docker-container
+# and env vars from https://tailscale.com/docs/features/containers/docker/docker-params
+# (TS_AUTHKEY, TS_STATE_DIR, TS_HOSTNAME, TS_USERSPACE=false for /dev/net/tun, etc.).
+#
+# Pick exactly one profile per machine:
+#   export TS_AUTHKEY='tskey-auth-...'   # Tailscale admin → Settings → Keys
+#   docker compose -f docker-compose.tailscale.yml --profile env up
+#   # other machine:
+#   docker compose -f docker-compose.tailscale.yml --profile gnc up
+#
+# Or set COMPOSE_PROFILES=env or COMPOSE_PROFILES=gnc in a .env file beside this file.
+#
+# Use the same tailnet (same TS_AUTHKEY type / tailnet) and the same ROS_DOMAIN_ID on both
+# hosts. LOCALHOST discovery is too narrow for two machines; defaults here use SUBNET.
+#
+# Kernel TUN (TS_USERSPACE=false) needs Linux with /dev/net/tun. If that bind fails (some
+# Docker setups), set TS_USERSPACE=true and drop the /dev/net/tun volume on the tailscale
+# services (userspace networking; see Tailscale Docker params docs).
+
+x-tailscale-common: &tailscale-common
+  image: tailscale/tailscale:latest
+  environment: &tailscale-ts-env
+    TS_AUTHKEY: ${TS_AUTHKEY:?Set TS_AUTHKEY to a Tailscale auth key (Tailscale admin → Settings → Keys)}
+    TS_STATE_DIR: /var/lib/tailscale
+    TS_USERSPACE: ${TS_USERSPACE:-false}
+    TS_AUTH_ONCE: ${TS_AUTH_ONCE:-true}
+    TS_EXTRA_ARGS: ${TS_EXTRA_ARGS:-}
+  volumes:
+    - /dev/net/tun:/dev/net/tun
+  cap_add:
+    - NET_ADMIN
+    - NET_RAW
+  restart: unless-stopped
+
+x-satellite-common: &satellite-common
+  build:
+    context: .
+    dockerfile: .docker/distributed_satellite_sim.Dockerfile
+  image: ${SIM_IMAGE:-astro-distributed-satellite-sim:local}
+  environment: &satellite-ros-env
+    ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
+    ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE:-SUBNET}
+    MAX_STEPS: ${MAX_STEPS:-91}
+    MIN_SUBSCRIBERS: ${MIN_SUBSCRIBERS:-1}
+  restart: unless-stopped
+
+services:
+  tailscale-env:
+    <<: *tailscale-common
+    profiles: ["env"]
+    hostname: ${TS_DOCKER_HOSTNAME_ENV:-astro-sim-tailscale-env}
+    environment:
+      <<: *tailscale-ts-env
+      TS_HOSTNAME: ${TS_HOSTNAME_ENV:-astro-sim-env}
+    volumes:
+      - tailscale-env-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+
+  satellite-env:
+    <<: *satellite-common
+    profiles: ["env"]
+    network_mode: service:tailscale-env
+    depends_on:
+      - tailscale-env
+    environment:
+      <<: *satellite-ros-env
+      ROLE: ENV
+
+  tailscale-gnc:
+    <<: *tailscale-common
+    profiles: ["gnc"]
+    hostname: ${TS_DOCKER_HOSTNAME_GNC:-astro-sim-tailscale-gnc}
+    environment:
+      <<: *tailscale-ts-env
+      TS_HOSTNAME: ${TS_HOSTNAME_GNC:-astro-sim-gnc}
+    volumes:
+      - tailscale-gnc-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+
+  satellite-gnc:
+    <<: *satellite-common
+    profiles: ["gnc"]
+    network_mode: service:tailscale-gnc
+    depends_on:
+      - tailscale-gnc
+    environment:
+      <<: *satellite-ros-env
+      ROLE: GNC
+
+volumes:
+  tailscale-env-state:
+  tailscale-gnc-state:
