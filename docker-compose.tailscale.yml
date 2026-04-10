@@ -13,7 +13,14 @@
 # Or set COMPOSE_PROFILES=env or COMPOSE_PROFILES=gnc in a .env file beside this file.
 #
 # Use the same tailnet (same TS_AUTHKEY type / tailnet) and the same ROS_DOMAIN_ID on both
-# hosts. LOCALHOST discovery is too narrow for two machines; defaults here use SUBNET.
+# hosts. For two different machines, Tailscale does not carry DDS multicast; set
+# ROS_DISCOVERY_PEER on each host to the OTHER host's Tailscale IP (100.x) or MagicDNS name
+# (see .docker/distributed_satellite_sim.entrypoint.sh). Example .env on ENV host:
+#   ROS_DISCOVERY_PEER=100.y.y.y
+# and on GNC host:
+#   ROS_DISCOVERY_PEER=100.x.x.x
+#
+# Without ROS_DISCOVERY_PEER, default discovery is unchanged (fine on one machine).
 #
 # Kernel TUN (TS_USERSPACE=false) needs Linux with /dev/net/tun. If that bind fails (some
 # Docker setups), set TS_USERSPACE=true and drop the /dev/net/tun volume on the tailscale
@@ -42,6 +49,7 @@ x-satellite-common: &satellite-common
   environment: &satellite-ros-env
     ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
     ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE:-SUBNET}
+    ROS_DISCOVERY_PEER: ${ROS_DISCOVERY_PEER:-}
     MAX_STEPS: ${MAX_STEPS:-91}
     MIN_SUBSCRIBERS: ${MIN_SUBSCRIBERS:-1}
   restart: unless-stopped
