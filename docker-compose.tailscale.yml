@@ -12,15 +12,12 @@
 #
 # Or set COMPOSE_PROFILES=env or COMPOSE_PROFILES=gnc in a .env file beside this file.
 #
-# Use the same tailnet (same TS_AUTHKEY type / tailnet) and the same ROS_DOMAIN_ID on both
-# hosts. For two different machines, Tailscale does not carry DDS multicast; set
-# ROS_DISCOVERY_PEER on each host to the OTHER host's Tailscale IP (100.x) or MagicDNS name
-# (see .docker/distributed_satellite_sim.entrypoint.sh). Example .env on ENV host:
-#   ROS_DISCOVERY_PEER=100.y.y.y
-# and on GNC host:
-#   ROS_DISCOVERY_PEER=100.x.x.x
-#
-# Without ROS_DISCOVERY_PEER, default discovery is unchanged (fine on one machine).
+# Same tailnet + same ROS_DOMAIN_ID on both hosts. Tailscale does not forward DDS multicast,
+# so the image uses Cyclone DDS unicast to the other node's Tailscale name (MagicDNS).
+# Defaults: TS_HOSTNAME astro-sim-env / astro-sim-gnc — ENV peers to GNC's name and vice versa.
+# Rename both sides consistently, e.g. TAILSCALE_SIM_NAME_ENV=my-env TAILSCALE_SIM_NAME_GNC=my-gnc
+# (must match each tailscale service's TS_HOSTNAME). Optional: ROS_DISCOVERY_PEER for IPs/extra
+# peers; ROS_AUTO_TAILSCALE_PEER=0 for multicast-only (single-host / no Cyclone peer config).
 #
 # Kernel TUN (TS_USERSPACE=false) needs Linux with /dev/net/tun. If that bind fails (some
 # Docker setups), set TS_USERSPACE=true and drop the /dev/net/tun volume on the tailscale
@@ -50,6 +47,9 @@ x-satellite-common: &satellite-common
     ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
     ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE:-SUBNET}
     ROS_DISCOVERY_PEER: ${ROS_DISCOVERY_PEER:-}
+    ROS_AUTO_TAILSCALE_PEER: ${ROS_AUTO_TAILSCALE_PEER:-1}
+    TAILSCALE_SIM_NAME_ENV: ${TS_HOSTNAME_ENV:-${TAILSCALE_SIM_NAME_ENV:-astro-sim-env}}
+    TAILSCALE_SIM_NAME_GNC: ${TS_HOSTNAME_GNC:-${TAILSCALE_SIM_NAME_GNC:-astro-sim-gnc}}
     MAX_STEPS: ${MAX_STEPS:-91}
     MIN_SUBSCRIBERS: ${MIN_SUBSCRIBERS:-1}
   restart: unless-stopped
@@ -61,7 +61,7 @@ services:
     hostname: ${TS_DOCKER_HOSTNAME_ENV:-astro-sim-tailscale-env}
     environment:
       <<: *tailscale-ts-env
-      TS_HOSTNAME: ${TS_HOSTNAME_ENV:-astro-sim-env}
+      TS_HOSTNAME: ${TS_HOSTNAME_ENV:-${TAILSCALE_SIM_NAME_ENV:-astro-sim-env}}
     volumes:
       - tailscale-env-state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
@@ -82,7 +82,7 @@ services:
     hostname: ${TS_DOCKER_HOSTNAME_GNC:-astro-sim-tailscale-gnc}
     environment:
       <<: *tailscale-ts-env
-      TS_HOSTNAME: ${TS_HOSTNAME_GNC:-astro-sim-gnc}
+      TS_HOSTNAME: ${TS_HOSTNAME_GNC:-${TAILSCALE_SIM_NAME_GNC:-astro-sim-gnc}}
     volumes:
       - tailscale-gnc-state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun

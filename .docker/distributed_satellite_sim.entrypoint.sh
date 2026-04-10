@@ -8,9 +8,23 @@ if [[ -z "${ROLE:-}" ]]; then
   exit 2
 fi
 
-# Tailscale (and many VPNs) do not forward DDS multicast. Default discovery then only works
-# on one host. Set ROS_DISCOVERY_PEER to the other node's Tailscale IP or MagicDNS name
-# (comma-separated for several peers). Uses Cyclone DDS unicast peers on interface tailscale0.
+# Tailscale (and many VPNs) do not forward DDS multicast, so default DDS discovery does not
+# reach the other host. With ROS_AUTO_TAILSCALE_PEER left at default, we point Cyclone at the
+# sibling's TS_HOSTNAME (MagicDNS) via TAILSCALE_SIM_NAME_ENV / TAILSCALE_SIM_NAME_GNC.
+# Override with ROS_DISCOVERY_PEER (comma-separated IPs or names), or set ROS_AUTO_TAILSCALE_PEER=0
+# to use normal multicast discovery (same machine only).
+_auto_peer="${ROS_AUTO_TAILSCALE_PEER:-1}"
+if [[ -z "${ROS_DISCOVERY_PEER:-}" && "${_auto_peer}" != "0" && "${_auto_peer}" != "false" && "${_auto_peer}" != "no" ]]; then
+  case "${ROLE}" in
+    ENV)
+      ROS_DISCOVERY_PEER="${TAILSCALE_SIM_NAME_GNC:-astro-sim-gnc}"
+      ;;
+    GNC)
+      ROS_DISCOVERY_PEER="${TAILSCALE_SIM_NAME_ENV:-astro-sim-env}"
+      ;;
+  esac
+fi
+
 if [[ -n "${ROS_DISCOVERY_PEER:-}" ]]; then
   for _wait in $(seq 1 90); do
     [[ -d /sys/class/net/tailscale0 ]] && break
