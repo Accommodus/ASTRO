@@ -12,6 +12,7 @@ setup(
         ('share/ament_index/resource_index/packages', [f'resource/{package_name}']),
         (f'share/{package_name}', ['package.xml']),
         (f'share/{package_name}/doc', ['doc/design_note.md']),
+        (f'share/{package_name}/launch', ['launch/bridge_sim.launch.py']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

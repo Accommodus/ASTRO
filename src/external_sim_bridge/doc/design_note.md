@@ -167,6 +167,20 @@ For v1:
 This keeps `#24` separate from issue `#6`, which is the broader controller and interface
 generalization track.
 
+## Basilisk Paper Comparison
+
+The current Basilisk backend matches the manuscript and Basilisk/ROS bridge literature at the
+high-level adapter boundary only:
+
+- Basilisk remains behind a ROS adapter instead of leaking simulator-native messages into the ROS
+  graph
+- `gnc_node` remains unchanged and still consumes `env_data` and calls `actuation_cmd`
+- simulator-specific setup, message translation, and timing live inside the Basilisk backend
+
+For v1, the implementation intentionally does not reproduce a richer paper-style decomposition of
+navigation, guidance, and control modules on the ROS side. The bridge validates the external
+deployment pattern first while preserving ASTRO's current ROS contract.
+
 ## Correction to Presentation Wording
 
 Some presentation text describes `gnc_node` as if it "serves" `actuation_cmd`.
@@ -204,3 +218,55 @@ documentation:
 - actuation interface used for translational thrust
 - additional runtime dependencies or environment setup requirements
 - known gaps, approximations, or validation blockers
+
+## Current Basilisk Backend Provenance
+
+The current `basilisk` backend is implemented against Basilisk's published Python API
+documentation, because Basilisk is not installed in the active development environment used for
+this slice.
+
+Documentation used while implementing the backend:
+
+- `SimulationBaseClass` API from Basilisk `2.4.0`
+- `thrusterDynamicEffector` API from Basilisk `2.4.0`
+- `simIncludeThruster` Python helper from Basilisk `2.4.0`
+- `SCStatesMsgPayload` message fields from Basilisk `2.4.0`
+- `THRArrayOnTimeCmdMsgPayload` message fields from Basilisk `2.4.0`
+- `spacecraft` module API from Basilisk `2.10.0`
+
+This is sufficient to implement the backend boundary and fail-fast import behavior, but it is not
+yet a substitute for validating against a single installed Basilisk release in CI or in the
+development container.
+
+## Current Basilisk Scenario Assumptions
+
+The current backend uses an internal validation scenario named
+`translational_3dof_axis_thrusters`.
+
+Current scenario assumptions are:
+
+- initial translational state matches ASTRO's current `EnvNode` default state
+- telemetry is read from `scStateOutMsg.r_BN_N` and `scStateOutMsg.v_BN_N`
+- the exported ROS vector remains `[x, y, z, vx, vy, vz]`
+- the spacecraft attitude is initialized to zero and angular dynamics are initialized to zero
+- translational control is represented by six center-of-mass thrusters aligned to `+x`, `-x`,
+  `+y`, `-y`, `+z`, and `-z`
+- ROS `thrust[3]` is split into positive and negative axis pairs using one-to-one axis ordering
+- each axis command is converted into Basilisk thruster on-time requests over the bridge's
+  `100 ms` timer period
+
+## Current Runtime Requirements and Blockers
+
+The current backend requires:
+
+- the Basilisk Python package to be installed and importable as `Basilisk`
+- the ROS 2 workspace to be built with both `distributed_satellite_sim` and
+  `external_sim_bridge`
+- launch via `external_sim_bridge/launch/bridge_sim.launch.py` or direct `ros2 run`
+
+Known current blockers and gaps:
+
+- the active workspace used for implementation does not have Basilisk installed
+- the backend therefore has startup validation only, not a live end-to-end Basilisk smoke test
+- the exact Basilisk release to support still needs to be pinned and tested as a single runtime
+  source of truth
