@@ -65,10 +65,11 @@ if [[ -n "${ROS_DISCOVERY_PEER:-}" ]]; then
   fi
 
   _cyclone_xml="/tmp/cyclonedds_tailscale.xml"
+  _ros_dom="${ROS_DOMAIN_ID:-42}"
   printf '%s\n' \
     '<?xml version="1.0" encoding="UTF-8" ?>' \
     '<CycloneDDS>' \
-    '  <Domain>' \
+    "  <Domain Id=\"${_ros_dom}\">" \
     '    <General>' \
     '      <Interfaces>' \
     '        <NetworkInterface name="tailscale0" priority="default" multicast="false"/>' \
@@ -86,6 +87,7 @@ if [[ -n "${ROS_DISCOVERY_PEER:-}" ]]; then
   export CYCLONEDDS_URI="file://${_cyclone_xml}"
   export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
   unset ROS_AUTOMATIC_DISCOVERY_RANGE
+  echo "[distributed_satellite_sim] CycloneDDS Domain=${_ros_dom} peers=${ROS_DISCOVERY_PEER}" >&2
 fi
 
 source /astro_ws/install/setup.bash

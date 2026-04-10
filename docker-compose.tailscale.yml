@@ -31,9 +31,8 @@ x-tailscale-common: &tailscale-common
     TS_STATE_DIR: /var/lib/tailscale
     TS_USERSPACE: ${TS_USERSPACE:-false}
     TS_AUTH_ONCE: ${TS_AUTH_ONCE:-true}
-    # Containers often lack a working iptables filter table; Tailscale logs "can't initialize
-    # iptables table filter" and router stays unhealthy. This avoids netfilter in the sidecar.
-    TS_EXTRA_ARGS: ${TS_EXTRA_ARGS:---netfilter-mode=off}
+    # Always disable netfilter in Docker (iptables often broken); append user flags after.
+    TS_EXTRA_ARGS: --netfilter-mode=off ${TS_EXTRA_ARGS:-}
   volumes:
     - /dev/net/tun:/dev/net/tun
   cap_add:
@@ -68,13 +67,20 @@ services:
     volumes:
       - tailscale-env-state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
+    healthcheck:
+      test: ["CMD-SHELL", "tailscale --socket=/tmp/tailscaled.sock status >/dev/null 2>&1"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+      start_period: 45s
 
   satellite-env:
     <<: *satellite-common
     profiles: ["env"]
     network_mode: service:tailscale-env
     depends_on:
-      - tailscale-env
+      tailscale-env:
+        condition: service_healthy
     environment:
       <<: *satellite-ros-env
       ROLE: ENV
@@ -89,13 +95,20 @@ services:
     volumes:
       - tailscale-gnc-state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
+    healthcheck:
+      test: ["CMD-SHELL", "tailscale --socket=/tmp/tailscaled.sock status >/dev/null 2>&1"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+      start_period: 45s
 
   satellite-gnc:
     <<: *satellite-common
     profiles: ["gnc"]
     network_mode: service:tailscale-gnc
     depends_on:
-      - tailscale-gnc
+      tailscale-gnc:
+        condition: service_healthy
     environment:
       <<: *satellite-ros-env
       ROLE: GNC
