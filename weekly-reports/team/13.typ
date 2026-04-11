@@ -74,3 +74,5 @@
   ),
   next-meeting: datetime(day: 15, month: 4, year: 2026),
 )
+
+#image("Commits_13.png")
