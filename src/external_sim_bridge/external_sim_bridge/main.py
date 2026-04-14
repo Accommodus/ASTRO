@@ -7,5 +7,8 @@ def main(args=None) -> None:
     rclpy.init(args=args)
     try:
         spin_bridge()
+    except KeyboardInterrupt:
+        pass
     finally:
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()

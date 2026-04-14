@@ -13,6 +13,18 @@ setup(
         (f'share/{package_name}', ['package.xml']),
         (f'share/{package_name}/doc', ['doc/design_note.md']),
         (f'share/{package_name}/launch', ['launch/bridge_sim.launch.py']),
+        (
+            f'share/{package_name}/test',
+            [
+                'test/test_fake_backend.py',
+                'test/test_bridge_node.py',
+                'test/test_bridge_reference_launch.py',
+            ],
+        ),
+        (
+            f'share/{package_name}/test/data',
+            ['test/data/dlqr_reference_trajectory.csv'],
+        ),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
