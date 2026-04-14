@@ -42,9 +42,10 @@ x-tailscale-common: &tailscale-common
 
 x-satellite-common: &satellite-common
   build:
-    context: .
+    context: ../
     dockerfile: .docker/distributed_satellite_sim.Dockerfile
-  image: ${SIM_IMAGE:-astro-distributed-satellite-sim:local}
+  image: ${SIM_IMAGE:-ghcr.io/accommodus/astro/distributed-satellite-sim:latest}
+  pull_policy: always
   environment: &satellite-ros-env
     ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
     ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE:-SUBNET}
