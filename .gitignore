@@ -3,4 +3,4 @@ log/
 build/
 install/
 **/.DS_Store
-.env
+**/.env
