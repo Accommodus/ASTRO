@@ -1,0 +1,54 @@
+# Local LAN testing (no Tailscale): Zenoh over TCP on port 7447 between ENV (desktop) and GNC (Jetson).
+#
+# Host networking is required on NJON/Jetson (bridge network often fails there) and keeps LAN IPs
+# straightforward for rmw_zenoh_cpp. On Docker Desktop, enable host/LAN access for Linux containers
+# so `network_mode: host` works; if the desktop cannot use host mode, use a compose override
+# that uses bridge networking and publishes 7447:7447, and set ROS_DISCOVERY_PEER to this
+# machine's LAN IP as seen from the Jetson.
+#
+# Pick exactly one profile per machine (same as compose.tailscale.yaml: COMPOSE_PROFILES):
+#   export LAN_PEER_HOST=192.168.x.y   # the *other* host (Jetson when this box is ENV; desktop when this box is GNC)
+#   docker compose -f compose.local.yaml --profile env up
+#   docker compose -f compose.local.yaml --profile gnc up   # on the other computer
+#
+# Or use a .env beside this file (see b/demo/README.md), for example:
+#   COMPOSE_FILE=compose.local.yaml
+#   COMPOSE_PROFILES=env
+#   LAN_PEER_HOST=192.168.x.y
+# then from b/demo/:  docker compose up
+#
+# Optional: set ROS_DISCOVERY_PEER yourself instead of LAN_PEER_HOST (comma-separated peers).
+# Same ROS_DOMAIN_ID on both machines (default 42). If the Windows side stalls on first
+# connection, ping the Jetson from the desktop once to warm ARP (Docker Desktop quirk).
+
+x-satellite-common: &satellite-common
+  build:
+    context: ../
+    dockerfile: .docker/distributed_satellite_sim.Dockerfile
+  image: ${SIM_IMAGE:-ghcr.io/accommodus/astro/distributed-satellite-sim:latest}
+  pull_policy: always
+  network_mode: host
+  environment: &satellite-ros-env
+    ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
+    ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE:-SUBNET}
+    ROS_DISCOVERY_PEER: ${ROS_DISCOVERY_PEER:-${LAN_PEER_HOST:?Set LAN_PEER_HOST (or ROS_DISCOVERY_PEER) to the other host on the LAN}}
+    ROS_AUTO_TAILSCALE_PEER: "0"
+    MAX_STEPS: ${MAX_STEPS:-91}
+    MIN_SUBSCRIBERS: ${MIN_SUBSCRIBERS:-1}
+    SIM_RATE_MS: ${SIM_RATE_MS:-100}
+  restart: unless-stopped
+
+services:
+  satellite-env:
+    <<: *satellite-common
+    profiles: ["env"]
+    environment:
+      <<: *satellite-ros-env
+      ROLE: ENV
+
+  satellite-gnc:
+    <<: *satellite-common
+    profiles: ["gnc"]
+    environment:
+      <<: *satellite-ros-env
+      ROLE: GNC
