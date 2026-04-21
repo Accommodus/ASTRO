@@ -1,0 +1,7 @@
+env_node:
+  ros__parameters:
+    timer_period_ms: 100
+    max_steps: 91
+    enable_docking_check: false
+    X0: [20.0, 20.0, 20.0, 0.00930458, -0.0467472, 0.00798343]
+    # Ad/Bd omitted — env_node defaults to the DLQR matrices
