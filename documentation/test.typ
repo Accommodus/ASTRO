@@ -1,7 +1,10 @@
-/*
-Testing Information: Include the following:
-Summary of testing conducted (unit, integration, system, acceptance)
-Test cases and results
-Outstanding bugs and defect log
-*/
+= Testing Information
 
+== Summary of Testing Conducted
+Testing for ASTRO was carried out across unit, integration, and system-level workflows, with acceptance judged against reproducible closed-loop behavior in the ROS2 baseline package. Unit testing covered the core simulation and control components through dedicated suites for `env_node` and `gnc_node`, and the repository also contains QP_GNC-oriented tests to support the expanded controller path. Integration and system validation were performed through launch-based workflows, including DLQR reference trajectory regression and QP_MPC convergence launch tests, which verify that node interactions remain consistent when exercised as a running ROS2 graph rather than as isolated components.
+
+== Test Cases and Results
+Representative unit cases validate environment propagation under zero and non-zero thrust inputs, confirm expected service behavior, and check published message structure so interface assumptions remain stable. Controller-focused cases validate control output under nominal, large-magnitude, and sign-varied state vectors to ensure stable behavior under both typical and edge conditions. At the integration level, the DLQR launch regression compares generated trajectory output against a committed reference fixture with tolerance-based assertions, providing a repeatable numerical check that the ROS2 implementation matches expected behavior. Based on current merged test coverage and repository documentation, the baseline testing milestones for the delivered ROS2 workflow are complete and operationally usable for continued development.
+
+== Outstanding Bugs and Defect Log
+There are currently no open bug-labeled issues in the GitHub tracker, indicating that no active defects are formally queued as bugs at this time. The remaining open items are enhancement-oriented backlog work, specifically Issue `#24` for external simulator bridge validation and Issue `#25` for telemetry/log buffering. While these are not defect tickets, they represent important risk areas for the next phase: bridge validation may expose interface and timing mismatches relative to the internal ROS2 baseline, and expanded telemetry features must be implemented carefully to avoid introducing runtime overhead that could affect deterministic control-loop behavior.
