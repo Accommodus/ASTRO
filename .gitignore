@@ -2,5 +2,7 @@ log/
 *.log
 build/
 install/
+__pycache__/
+*.py[cod]
 **/.DS_Store
 **/.env
