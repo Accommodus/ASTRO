@@ -46,3 +46,4 @@ Biography: Include a biography of each team member, places where they have worke
 #include "title-page.typ"
 #pagebreak()
 #include "overview.typ"
+#include "deli.typ"
