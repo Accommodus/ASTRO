@@ -1,4 +1,4 @@
-#import "style.typ": main-title
+#import "../style.typ": main-title
 
 #main-title([ASTRO:], [Autonomous Satellite Test & Robotics Operations])
 

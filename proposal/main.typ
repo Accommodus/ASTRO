@@ -1,5 +1,5 @@
-#import "style.typ": *
-#show: general
+#import "../style.typ": *
+#show: report
 
 #include "cover.typ"
 #pagebreak()

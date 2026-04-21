@@ -1,4 +1,4 @@
-#import "style.typ": tbl, signature-list, subtitle
+#import "../style.typ": tbl, signature-list
 
 == Objectives
   Our team's primary objective is to take an existing software system from the STAR Lab and fully integrate it into the ROS2 framework. We plan to encapsulate the current infrastructure to function within ROS2 nodes, which will allow us to modernize the architecture and expand its capabilities using the framework's communication tools. We are currently evaluating potential candidates for this migration and will finalize the specific system after meeting with the professor to determine the best fit for the project scope.
