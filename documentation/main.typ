@@ -1,7 +1,7 @@
-/* 
+/*
 Your report should include:
 
-Title Page: Title page should have the following: 
+Title Page: Title page should have the following:
 Title
 Team name
 Team member names
@@ -47,3 +47,4 @@ Biography: Include a biography of each team member, places where they have worke
 #pagebreak()
 #include "overview.typ"
 #include "deli.typ"
+#include "tech.typ"
