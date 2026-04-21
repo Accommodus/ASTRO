@@ -101,7 +101,13 @@ class BasiliskBackend:
     def apply_control(self, control: Sequence[float]) -> None:
         self.validate_control(control)
         self._control = [float(value) for value in control]
-        self._thruster_command_msg.write(self._build_thruster_payload(self._control_to_on_times()))
+        # Basilisk treats later writes with the default timestamp of 0 ns as stale once the
+        # simulation has advanced. Stamp each command at the current simulation time so
+        # post-start actuation updates are consumed on the next integration step.
+        self._thruster_command_msg.write(
+            self._build_thruster_payload(self._control_to_on_times()),
+            self._current_stop_time_ns,
+        )
 
     def advance(self) -> list[float]:
         if self._step_period_ns is None:
@@ -196,6 +202,8 @@ class BasiliskBackend:
 
     def _build_thruster_payload(self, on_times: Sequence[float]) -> Any:
         payload = self._messaging.THRArrayOnTimeCmdMsgPayload()
+        requested_on_times = list(payload.OnTimeRequest)
         for index, on_time in enumerate(on_times):
-            payload.OnTimeRequest[index] = float(on_time)
+            requested_on_times[index] = float(on_time)
+        payload.OnTimeRequest = requested_on_times
         return payload

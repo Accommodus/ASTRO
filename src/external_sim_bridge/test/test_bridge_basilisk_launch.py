@@ -46,6 +46,7 @@ STATE_SIZE = 6
 SHUTDOWN_AFTER_SEC = 15.0
 RECEIVE_TIMEOUT_SEC = 12.0
 DISCOVERY_TIMEOUT_SEC = 10.0
+CONTROL_EFFECT_TOLERANCE = 1e-6
 
 
 class BasiliskTrajectoryRecorder(Node):
@@ -64,6 +65,7 @@ class BasiliskTrajectoryRecorder(Node):
 
 
 if BASILISK_AVAILABLE:
+    from external_sim_bridge.backends.basilisk_backend import BasiliskBackend
 
     @pytest.mark.rostest
     def generate_test_description():
@@ -98,6 +100,7 @@ if BASILISK_AVAILABLE:
             if not rclpy.ok():
                 rclpy.init()
             cls.recorder = BasiliskTrajectoryRecorder()
+            cls.zero_control_trajectory = cls._build_zero_control_trajectory()
 
         @classmethod
         def tearDownClass(cls):
@@ -105,7 +108,18 @@ if BASILISK_AVAILABLE:
             if rclpy.ok():
                 rclpy.shutdown()
 
-        def test_basilisk_bridge_publishes_finite_state_trajectory(self):
+        @staticmethod
+        def _build_zero_control_trajectory():
+            backend = BasiliskBackend()
+            backend.initialize()
+            backend.apply_control([0.0, 0.0, 0.0])
+
+            trajectory = []
+            for _ in range(EXPECTED_STEPS):
+                trajectory.append(backend.advance())
+            return trajectory
+
+        def test_basilisk_bridge_closed_loop_affects_state_trajectory(self, proc_output):
             discovery_deadline = time.monotonic() + DISCOVERY_TIMEOUT_SEC
             while (
                 self.recorder.count_publishers('env_data') == 0
@@ -133,9 +147,17 @@ if BASILISK_AVAILABLE:
                 f'Expected {EXPECTED_STEPS} env_data messages, received {received}',
             )
 
+            proc_output.assertWaitFor(
+                'actuation_cmd received',
+                timeout=DISCOVERY_TIMEOUT_SEC,
+            )
+
             saw_motion = False
+            saw_closed_loop_divergence = False
             previous_state = None
-            for step, state in enumerate(self.recorder.trajectory):
+            for step, (state, baseline_state) in enumerate(
+                zip(self.recorder.trajectory, self.zero_control_trajectory)
+            ):
                 self.assertEqual(
                     len(state),
                     STATE_SIZE,
@@ -147,6 +169,12 @@ if BASILISK_AVAILABLE:
                         f'Trajectory row {step} state[{index}] must be finite',
                     )
 
+                if step > 0 and any(
+                    abs(actual - baseline) > CONTROL_EFFECT_TOLERANCE
+                    for actual, baseline in zip(state, baseline_state)
+                ):
+                    saw_closed_loop_divergence = True
+
                 if previous_state is not None and any(
                     abs(current - previous) > 1e-9
                     for current, previous in zip(state, previous_state)
@@ -156,6 +184,11 @@ if BASILISK_AVAILABLE:
                 previous_state = state
 
             self.assertTrue(saw_motion, 'Basilisk launch trajectory did not change between steps')
+            self.assertTrue(
+                saw_closed_loop_divergence,
+                'Launched Basilisk trajectory never diverged from the zero-control baseline; '
+                'the actuation path may not have affected the simulator state',
+            )
 
 
     @launch_testing.post_shutdown_test()
