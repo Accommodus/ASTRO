@@ -62,6 +62,11 @@ install(DIRECTORY launch/
   DESTINATION share/${PROJECT_NAME}/launch
 )
 
+install(FILES
+  test/data/dlqr_reference_trajectory.csv
+  DESTINATION share/${PROJECT_NAME}/test/data
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()

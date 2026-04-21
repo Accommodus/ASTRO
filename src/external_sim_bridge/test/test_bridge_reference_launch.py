@@ -22,7 +22,7 @@ from rclpy.qos import QoSProfile
 from std_msgs.msg import Float64MultiArray
 
 REFERENCE_FIXTURE_PATH = os.path.join(
-    get_package_share_directory('external_sim_bridge'),
+    get_package_share_directory('distributed_satellite_sim'),
     'test',
     'data',
     'dlqr_reference_trajectory.csv',
@@ -99,13 +99,15 @@ def generate_test_description():
 class TestBridgeReferenceTrajectory(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        rclpy.init()
+        if not rclpy.ok():
+            rclpy.init()
         cls.recorder = TrajectoryRecorder()
 
     @classmethod
     def tearDownClass(cls):
         cls.recorder.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
     def test_bridge_ros_trajectory_matches_reference(self):
         reference_trajectory = _load_reference_trajectory()

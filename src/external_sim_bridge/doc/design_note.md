@@ -127,8 +127,9 @@ That backend should use:
 This backend is not a toy stub. It is the bridge-core regression target that allows:
 
 - closed-loop testing with the existing `gnc_node`
-- comparison against the existing DLQR reference fixture in
-  `src/DistributedSatelliteSim/test/data/dlqr_reference_trajectory.csv`
+- comparison against the canonical installed DLQR reference fixture owned by
+  `distributed_satellite_sim` at
+  `share/distributed_satellite_sim/test/data/dlqr_reference_trajectory.csv`
 - isolation of bridge-architecture bugs before simulator-specific Basilisk work begins
 
 ## Failure Handling
@@ -221,11 +222,10 @@ documentation:
 
 ## Current Basilisk Backend Provenance
 
-The current `basilisk` backend is implemented against Basilisk's published Python API
-documentation, because Basilisk is not installed in the active development environment used for
-this slice.
+The current `basilisk` backend is pinned to the Basilisk Python runtime package
+`bsk==2.10.0` for automated validation.
 
-Documentation used while implementing the backend:
+Documentation and runtime references used while implementing the backend:
 
 - `SimulationBaseClass` API from Basilisk `2.4.0`
 - `thrusterDynamicEffector` API from Basilisk `2.4.0`
@@ -233,10 +233,7 @@ Documentation used while implementing the backend:
 - `SCStatesMsgPayload` message fields from Basilisk `2.4.0`
 - `THRArrayOnTimeCmdMsgPayload` message fields from Basilisk `2.4.0`
 - `spacecraft` module API from Basilisk `2.10.0`
-
-This is sufficient to implement the backend boundary and fail-fast import behavior, but it is not
-yet a substitute for validating against a single installed Basilisk release in CI or in the
-development container.
+- validated CI runtime pin: `bsk==2.10.0`
 
 ## Current Basilisk Scenario Assumptions
 
@@ -255,7 +252,7 @@ Current scenario assumptions are:
 - each axis command is converted into Basilisk thruster on-time requests over the bridge's
   `100 ms` timer period
 
-## Current Runtime Requirements and Blockers
+## Validated Runtime Record
 
 The current backend requires:
 
@@ -264,9 +261,23 @@ The current backend requires:
   `external_sim_bridge`
 - launch via `external_sim_bridge/launch/bridge_sim.launch.py` or direct `ros2 run`
 
-Known current blockers and gaps:
+Authoritative validation environment:
 
-- the active workspace used for implementation does not have Basilisk installed
-- the backend therefore has startup validation only, not a live end-to-end Basilisk smoke test
-- the exact Basilisk release to support still needs to be pinned and tested as a single runtime
-  source of truth
+- GitHub Actions workflow `.github/workflows/validate-external-sim-bridge.yml`
+- base runtime `ghcr.io/accommodus/astro:latest`
+- Basilisk runtime pin `bsk==2.10.0`
+- CI guard `ASTRO_EXPECT_BASILISK=1` so Basilisk tests fail if the runtime is absent
+
+Live validation performed in the authoritative environment:
+
+- direct Basilisk backend smoke coverage in `test/test_basilisk_backend.py`
+- end-to-end bridge launch coverage in `test/test_bridge_basilisk_launch.py`
+- fake-backend parity coverage against the installed canonical `distributed_satellite_sim`
+  trajectory fixture in `test/test_bridge_reference_launch.py`
+
+Remaining limitations:
+
+- the Basilisk validation scenario is still the fixed internal
+  `translational_3dof_axis_thrusters` bridge scenario, not a full HCW-equivalent model
+- local development environments that do not install Basilisk will skip the Basilisk-specific
+  tests by default

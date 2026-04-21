@@ -19,11 +19,9 @@ setup(
                 'test/test_fake_backend.py',
                 'test/test_bridge_node.py',
                 'test/test_bridge_reference_launch.py',
+                'test/test_basilisk_backend.py',
+                'test/test_bridge_basilisk_launch.py',
             ],
-        ),
-        (
-            f'share/{package_name}/test/data',
-            ['test/data/dlqr_reference_trajectory.csv'],
         ),
     ],
     install_requires=['setuptools'],
