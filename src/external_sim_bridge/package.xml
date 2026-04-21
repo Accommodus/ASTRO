@@ -11,8 +11,6 @@
   <maintainer email="dylan.long@ufl.edu">Dylan Long</maintainer>
   <license>Apache-2.0</license>
 
-  <buildtool_depend>ament_python</buildtool_depend>
-
   <depend>distributed_satellite_sim</depend>
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
