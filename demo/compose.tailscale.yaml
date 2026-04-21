@@ -6,11 +6,11 @@
 #
 # Pick exactly one profile per machine:
 #   export TS_AUTHKEY='tskey-auth-...'   # Tailscale admin → Settings → Keys
-#   docker compose -f docker-compose.tailscale.yml --profile env up
-#   # other machine:
-#   docker compose -f docker-compose.tailscale.yml --profile gnc up
+#   docker compose -f compose.tailscale.yaml --profile env up
+#   docker compose -f compose.tailscale.yaml --profile gnc up   # other machine
 #
-# Or set COMPOSE_PROFILES=env or COMPOSE_PROFILES=gnc in a .env file beside this file.
+# Or set COMPOSE_PROFILES=env or COMPOSE_PROFILES=gnc (and TS_AUTHKEY) in a .env beside this file;
+# optionally COMPOSE_FILE=compose.tailscale.yaml then run: docker compose up  (from b/demo/)
 #
 # Same tailnet + same ROS_DOMAIN_ID on both hosts. Tailscale does not forward DDS multicast,
 # so the image uses Cyclone DDS unicast to the other node's Tailscale name (MagicDNS).
