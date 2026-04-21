@@ -20,9 +20,11 @@
 #include "std_msgs/msg/float64_multi_array.hpp"
 
 #include "distributed_satellite_sim/env_node.hpp"
+#include "distributed_satellite_sim/msg/actuation_sample.hpp"
 #include "distributed_satellite_sim/srv/actuation_cmd.hpp"
 
 using ActuationCmd = distributed_satellite_sim::srv::ActuationCmd;
+using ActuationSample = distributed_satellite_sim::msg::ActuationSample;
 
 static Eigen::Matrix<double, 6, 6> test_Ad()
 {
@@ -81,10 +83,16 @@ protected:
     helper_node_ = rclcpp::Node::make_shared("test_helper");
     client_ = helper_node_->create_client<ActuationCmd>("actuation_cmd");
     received_msg_.reset();
+    received_actuation_applied_.reset();
     sub_ = helper_node_->create_subscription<std_msgs::msg::Float64MultiArray>(
       "env_data", 10,
       [this](std_msgs::msg::Float64MultiArray::SharedPtr msg) {
         received_msg_ = msg;
+      });
+    actuation_applied_sub_ = helper_node_->create_subscription<ActuationSample>(
+      "actuation_applied", 10,
+      [this](ActuationSample::SharedPtr msg) {
+        received_actuation_applied_ = msg;
       });
 
     executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
@@ -97,6 +105,7 @@ protected:
     executor_->cancel();
     executor_->remove_node(helper_node_);
     executor_->remove_node(env_node_);
+    actuation_applied_sub_.reset();
     sub_.reset();
     client_.reset();
     helper_node_.reset();
@@ -136,7 +145,9 @@ protected:
   rclcpp::Node::SharedPtr helper_node_;
   rclcpp::Client<ActuationCmd>::SharedPtr client_;
   rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr sub_;
+  rclcpp::Subscription<ActuationSample>::SharedPtr actuation_applied_sub_;
   std_msgs::msg::Float64MultiArray::SharedPtr received_msg_;
+  ActuationSample::SharedPtr received_actuation_applied_;
   std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor_;
 };
 
@@ -209,4 +220,27 @@ TEST_F(EnvNodeTest, TopicPublishesCorrectSize)
   spin_until_message();
   ASSERT_NE(received_msg_, nullptr) << "No message received on env_data";
   EXPECT_EQ(received_msg_->data.size(), 6u);
+}
+
+TEST_F(EnvNodeTest, ActuationAppliedMirrorsAccepted)
+{
+  double t0 = 1e-7, t1 = -2e-7, t2 = 5e-8;
+  ASSERT_TRUE(call_actuation(t0, t1, t2));
+
+  auto start = std::chrono::steady_clock::now();
+  while (!received_actuation_applied_ &&
+    (std::chrono::steady_clock::now() - start) < std::chrono::seconds(2))
+  {
+    executor_->spin_some(std::chrono::milliseconds(10));
+  }
+
+  ASSERT_NE(received_actuation_applied_, nullptr)
+    << "No message received on actuation_applied";
+  ASSERT_EQ(received_actuation_applied_->actuation.size(), 3u);
+  EXPECT_NEAR(received_actuation_applied_->actuation[0], t0, 1e-15);
+  EXPECT_NEAR(received_actuation_applied_->actuation[1], t1, 1e-15);
+  EXPECT_NEAR(received_actuation_applied_->actuation[2], t2, 1e-15);
+  EXPECT_GT(
+    rclcpp::Time(received_actuation_applied_->stamp).nanoseconds(), 0)
+    << "Stamp should be non-zero";
 }

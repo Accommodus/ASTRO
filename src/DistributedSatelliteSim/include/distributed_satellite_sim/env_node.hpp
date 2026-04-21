@@ -22,10 +22,13 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/float64_multi_array.hpp"
 
+#include "distributed_satellite_sim/msg/actuation_sample.hpp"
 #include "distributed_satellite_sim/srv/actuation_cmd.hpp"
- 
+
 using ActuationCmd = distributed_satellite_sim::srv::ActuationCmd;
- 
+using ActuationSample = distributed_satellite_sim::msg::ActuationSample;
+
+
 class EnvNode : public rclcpp::Node
 {
 public:
@@ -85,6 +88,7 @@ public:
     C_vel_ = Eigen::Matrix<double, 3, 6>::Zero();
     C_vel_.block<3, 3>(0, 3) = Eigen::Matrix3d::Identity();
     state_pub_ = create_publisher<std_msgs::msg::Float64MultiArray>("env_data", 10);
+    actuation_applied_pub_ = create_publisher<ActuationSample>("actuation_applied", 10);
  
     cmd_srv_ = create_service<ActuationCmd>(
       "actuation_cmd",
@@ -151,6 +155,11 @@ private:
   {
     u_now_ << req->thrust[0], req->thrust[1], req->thrust[2];
     res->success = true;
+
+    ActuationSample sample;
+    sample.stamp = now();
+    sample.actuation = {u_now_(0), u_now_(1), u_now_(2)};
+    actuation_applied_pub_->publish(sample);
  
     RCLCPP_INFO(get_logger(),
       "actuation_cmd received: u = [%.6e, %.6e, %.6e]",
@@ -175,6 +184,7 @@ private:
   bool enable_docking_check_;
  
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr state_pub_;
+  rclcpp::Publisher<ActuationSample>::SharedPtr actuation_applied_pub_;
   rclcpp::Service<ActuationCmd>::SharedPtr cmd_srv_;
   rclcpp::TimerBase::SharedPtr timer_;
 };

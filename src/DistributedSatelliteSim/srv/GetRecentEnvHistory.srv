@@ -1,0 +1,5 @@
+uint32 limit
+---
+distributed_satellite_sim/StateSample[] entries
+uint32 total_buffered
+uint32 capacity
