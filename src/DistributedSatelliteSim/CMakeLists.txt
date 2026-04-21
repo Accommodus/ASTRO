@@ -18,6 +18,15 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 rosidl_get_typesupport_target(typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
 
+# ---------- QuadProg++ ----------
+add_library(quadprogpp STATIC
+  quadprogpp/QuadProg++.cc
+  quadprogpp/Array.cc
+)
+target_include_directories(quadprogpp PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/quadprogpp
+)
+
 # ---------- Env Node library (testable) ----------
 add_library(env_node_lib SHARED
   src/env_node.cpp
@@ -42,6 +51,7 @@ install(TARGETS env_node_lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
+
 # ---------- GNC Node ----------
 add_executable(gnc_node src/gnc_node.cpp)
 target_include_directories(gnc_node PRIVATE
@@ -54,7 +64,21 @@ ament_target_dependencies(gnc_node
 )
 target_link_libraries(gnc_node "${typesupport_target}")
 
-install(TARGETS env_node gnc_node
+# ---------- QP GNC Node ----------
+add_executable(qp_gnc_node src/qp_gnc_node.cpp)
+target_include_directories(qp_gnc_node PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/quadprogpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../reference/quadprog_files
+  ${EIGEN3_INCLUDE_DIRS}
+)
+ament_target_dependencies(qp_gnc_node
+  rclcpp
+  std_msgs
+)
+target_link_libraries(qp_gnc_node quadprogpp "${typesupport_target}")
+
+install(TARGETS env_node gnc_node qp_gnc_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -65,6 +89,10 @@ install(DIRECTORY launch/
 install(FILES
   test/data/dlqr_reference_trajectory.csv
   DESTINATION share/${PROJECT_NAME}/test/data
+)
+
+install(DIRECTORY config/
+  DESTINATION share/${PROJECT_NAME}/config
 )
 
 if(BUILD_TESTING)
@@ -95,6 +123,25 @@ if(BUILD_TESTING)
     test/test_dlqr_reference_launch.py
     TIMEOUT 60
   )
+
+    # ---------- QP GNC Node unit test ----------
+  ament_add_gtest(test_qp_gnc_node
+    test/test_qp_gnc_node.cpp
+  )
+  target_include_directories(test_qp_gnc_node PRIVATE
+    ${EIGEN3_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/quadprogpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../reference/quadprog_files
+  )
+  target_link_libraries(test_qp_gnc_node quadprogpp)
+ 
+  # ---------- QP-MPC convergence launch test ----------
+  add_launch_test(
+    test/test_qp_mpc_convergence_launch.py
+    TIMEOUT 60
+  )
+ 
 endif()
 
 ament_package()
