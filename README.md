@@ -31,12 +31,14 @@ Implemented components:
 - `ActuationCmd.srv`
 - `sim.launch.py`
 - environment-node unit tests
+- GNC-node unit tests
+- launch-based DLQR reference trajectory regression test
 
 At the package level, the interfaces are:
 
 - topic: `env_data`
 - service: `actuation_cmd`
-- launch argument: `max_steps`
+- launch arguments: `max_steps`, `min_subscribers`
 
 The current implementation is a ROS 2 port of the DLQR reference code in:
 
@@ -97,7 +99,10 @@ Within [`src/DistributedSatelliteSim`](src/DistributedSatelliteSim):
 - [`src/gnc_node.cpp`](src/DistributedSatelliteSim/src/gnc_node.cpp): DLQR controller node
 - [`srv/ActuationCmd.srv`](src/DistributedSatelliteSim/srv/ActuationCmd.srv): service definition
 - [`launch/sim.launch.py`](src/DistributedSatelliteSim/launch/sim.launch.py): combined launch entrypoint
-- [`test/test_env_node.cpp`](src/DistributedSatelliteSim/test/test_env_node.cpp): environment-node tests
+- [`test/test_env_node.cpp`](src/DistributedSatelliteSim/test/test_env_node.cpp): environment-node unit tests
+- [`test/test_gnc_node.cpp`](src/DistributedSatelliteSim/test/test_gnc_node.cpp): GNC-node unit tests
+- [`test/test_dlqr_reference_launch.py`](src/DistributedSatelliteSim/test/test_dlqr_reference_launch.py): launch-based DLQR reference trajectory regression test
+- [`test/data/dlqr_reference_trajectory.csv`](src/DistributedSatelliteSim/test/data/dlqr_reference_trajectory.csv): 91-step reference fixture from standalone DLQR executables
 
 ## Development environment
 
@@ -167,22 +172,21 @@ colcon test-result --verbose
 
 The current tests cover:
 
-- zero-thrust propagation
-- non-zero-thrust propagation
-- default initial state behavior
-- service success responses
-- topic message sizing
-
-The current test coverage is focused on the environment node. There is not yet a committed end-to-end regression test that launches both nodes and compares the full closed-loop trajectory against the original standalone reference output.
+- **Env-node unit tests**: zero-thrust propagation, non-zero-thrust propagation, default initial state behavior, service success responses, topic message sizing
+- **GNC-node unit tests**: zero-state output, known-state output, large-state output, negative-component output
+- **DLQR reference trajectory regression**: launches both nodes through `sim.launch.py`, records 91 steps of `env_data`, and compares each value against the committed reference fixture (`test/data/dlqr_reference_trajectory.csv`) within a tolerance of `1e-4`
 
 ## Roadmap
 
+Completed milestones:
+
+- ROS 2 DLQR implementation validated against the original reference executables
+- end-to-end launch-based regression test committed and passing
+
 Near-term work is centered on:
 
-- validating the ROS 2 DLQR implementation against the original reference executables
-- adding end-to-end integration testing
 - parameterizing the environment model for alternate controller configurations
-- integrating the QP_MPC controller path later
+- integrating the QP_MPC controller path
 
 The `reference/QP_MPC` code is already in the repository, but it is not wired into the ROS 2 package yet and uses different dynamics and timing than the current DLQR environment.
 
@@ -193,7 +197,6 @@ That difference is significant: the QP_MPC path is not just a second controller 
 - the environment dynamics are hardcoded rather than configured through parameters or YAML
 - the launch flow currently targets the DLQR scenario only
 - the external simulator bridge described in the project manuscripts is not implemented on `main`
-- [`src/DistributedSatelliteSim/package.xml`](src/DistributedSatelliteSim/package.xml) still has placeholder license metadata
 
 ## Additional project context
 

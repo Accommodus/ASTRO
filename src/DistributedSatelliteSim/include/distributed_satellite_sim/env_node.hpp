@@ -84,7 +84,6 @@ public:
     C_pos_.block<3, 3>(0, 0) = Eigen::Matrix3d::Identity();
     C_vel_ = Eigen::Matrix<double, 3, 6>::Zero();
     C_vel_.block<3, 3>(0, 3) = Eigen::Matrix3d::Identity();
- 
     state_pub_ = create_publisher<std_msgs::msg::Float64MultiArray>("env_data", 10);
  
     cmd_srv_ = create_service<ActuationCmd>(
