@@ -68,7 +68,8 @@ target_link_libraries(gnc_node "${typesupport_target}")
 add_executable(qp_gnc_node src/qp_gnc_node.cpp)
 target_include_directories(qp_gnc_node PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/quadprogpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/quadprogpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../reference/quadprog_files
   ${EIGEN3_INCLUDE_DIRS}
 )
 ament_target_dependencies(qp_gnc_node
@@ -125,7 +126,8 @@ if(BUILD_TESTING)
   target_include_directories(test_qp_gnc_node PRIVATE
     ${EIGEN3_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/quadprogpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/quadprogpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../reference/quadprog_files
   )
   target_link_libraries(test_qp_gnc_node quadprogpp)
  
