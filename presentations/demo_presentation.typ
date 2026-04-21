@@ -90,6 +90,9 @@
         [A modular interface makes systems easier to swap, validate, and combine across the lab.]
       ),
     )
+
+    #v(0.22in)
+    #text(size: 16pt)[Earlier simulator-specific bridge approaches showed that distributed simulation and control could be connected, but they left a gap in reusability and standardization. ASTRO fills that gap with a modular ROS 2 interface.]
   ],
 )
 
@@ -163,6 +166,9 @@
         #text(size: 18pt)[The demonstrated system already includes environment-node tests, GNC-node tests, and a regression check against the original reference trajectory.]
       ],
     )
+
+    #v(0.24in)
+    #text(size: 17pt)[Results shown here: a working two-laptop distributed control loop, reusable ROS 2 interfaces between simulation and control, and a validated DLQR baseline.]
   ],
 )
 
