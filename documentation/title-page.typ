@@ -23,7 +23,7 @@ Cannon Whitney, Dylan Long, and Caleb Jackson
   grid.hline(),
   emph[Course Information:], [],
   [Name], [CIS 4914 Senior Project],
-  [Final Presentation], link("https://youtube.com"),
+  [Final Presentation], link("https://youtu.be/l_Ran7eGMPs"),
   grid.hline(),
   emph[Keywords:], [autonomous systems, robotics, satellite simulation, ROS 2, middleware, hardware-in-the-loop],
 ))
