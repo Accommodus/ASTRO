@@ -17,7 +17,7 @@ Cannon Whitney, Dylan Long, and Caleb Jackson
   [Title], [ASTRO: Autonomous Satellite Test & Robotics Operations],
   [Team Name], [ASTRO],
   grid.hline(),
-  emph[Advisor Information:],[],
+  emph[Advisor Information:], [],
   [Name], [Dr. Christopher “Chrispy” Petersen],
   [Email], link("mailto:c.petersen1@ufl.edu"),
   grid.hline(),
@@ -25,5 +25,5 @@ Cannon Whitney, Dylan Long, and Caleb Jackson
   [Name], [CIS 4914 Senior Project],
   [Final Presentation], link("https://youtube.com"),
   grid.hline(),
-  emph[Keywords:], [autonomous systems, robotics, satellite simulation, ROS 2, middleware, hardware-in-the-loop]
+  emph[Keywords:], [autonomous systems, robotics, satellite simulation, ROS 2, middleware, hardware-in-the-loop],
 ))

@@ -35,11 +35,19 @@
 
 Build both packages and source the workspace:
 
-#raw(block: true, lang: "bash", "source /opt/ros/kilted/setup.bash\ncolcon build --packages-select distributed_satellite_sim external_sim_bridge\nsource install/setup.bash\n")
+#raw(
+  block: true,
+  lang: "bash",
+  "source /opt/ros/kilted/setup.bash\ncolcon build --packages-select distributed_satellite_sim external_sim_bridge\nsource install/setup.bash\n",
+)
 
 Run any of the four launch configurations:
 
-#raw(block: true, lang: "bash", "ros2 launch distributed_satellite_sim sim.launch.py\nros2 launch distributed_satellite_sim qp_mpc_launch.py\nros2 launch external_sim_bridge bridge_sim.launch.py backend_type:=fake\nros2 launch external_sim_bridge bridge_sim.launch.py backend_type:=basilisk\n")
+#raw(
+  block: true,
+  lang: "bash",
+  "ros2 launch distributed_satellite_sim sim.launch.py\nros2 launch distributed_satellite_sim qp_mpc_launch.py\nros2 launch external_sim_bridge bridge_sim.launch.py backend_type:=fake\nros2 launch external_sim_bridge bridge_sim.launch.py backend_type:=basilisk\n",
+)
 
 == Environment Variable Reference <appendix-env-vars>
 
@@ -67,11 +75,19 @@ Both machines must have Docker installed. Run commands from `demo/` so Compose b
 
 *Tailscale — machine 1 (ENV):*
 
-#raw(block: true, lang: "bash", "export TS_AUTHKEY='tskey-auth-...'\ndocker compose -f compose.tailscale.yaml --profile env up\n")
+#raw(
+  block: true,
+  lang: "bash",
+  "export TS_AUTHKEY='tskey-auth-...'\ndocker compose -f compose.tailscale.yaml --profile env up\n",
+)
 
 *Tailscale — machine 2 (GNC):*
 
-#raw(block: true, lang: "bash", "export TS_AUTHKEY='tskey-auth-...'\ndocker compose -f compose.tailscale.yaml --profile gnc up\n")
+#raw(
+  block: true,
+  lang: "bash",
+  "export TS_AUTHKEY='tskey-auth-...'\ndocker compose -f compose.tailscale.yaml --profile gnc up\n",
+)
 
 *Local LAN (no Tailscale):* use `compose.local.yaml` with `LAN_PEER_HOST` set to the peer's address and the same `env` / `gnc` profiles; see `demo/README.md`.
 

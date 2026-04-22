@@ -81,10 +81,12 @@ The minimal contract is topic `env_data` (`std_msgs/Float64MultiArray`) for the 
   [
     `env_node` publishes state on `env_data`; `gnc_node` or `qp_gnc_node` subscribes and sends thrust through `actuation_cmd` back to the environment.
   ],
+
   [Bridge],
   [
     `bridge_node` plays the environment role (same topic and service contract) while delegating physics to a backend; GNC nodes require no changes.
   ],
+
   [Cross-host],
   [
     Across machines, `rmw_zenoh_cpp` and the `demo/` Compose stacks (`compose.tailscale.yaml`, `compose.local.yaml`) configure peers for stable cross-host operation.

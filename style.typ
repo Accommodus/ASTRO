@@ -64,7 +64,7 @@
   set heading(numbering: "1.1)")
   show heading.where(level: 1): set block(above: 1em, below: 0.5em)
 
-  set par(first-line-indent: 0em)
+  set par(first-line-indent: 0em, leading: 1em)
   set figure(placement: top)
   set figure.caption(separator: ". ")
   show figure.where(kind: table): set figure.caption(position: top)
