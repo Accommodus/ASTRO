@@ -10,7 +10,7 @@
 - Person 2 = Dylan
 - Person 3 = Caleb
 
-= Cannon (Person 1)
+= Caleb (Person 3)
 
 == Introduction - What is ASTRO?
 
@@ -20,7 +20,7 @@ The core problem we are addressing is that the lab's simulation and control work
 
 == Introduction - Today's Agenda
 
-Today's presentation is mostly a live walkthrough of the working software. We will briefly frame the project, then walk through the repository, show the local controller runs, show the external simulator bridge, show the two-machine deployment setup, and end with contributions and wrap-up.
+Today's presentation is mostly a live walkthrough of the working software. We will briefly frame the project, then walk through the repository, show the local controller runs, show the external simulator bridge, show the two-machine deployment setup, and end with contributions and wrap-up. From here, Cannon will take over, walk through the live demo plan, and go directly into the demo.
 
 = Cannon (Person 1)
 
