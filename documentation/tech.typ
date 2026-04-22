@@ -30,38 +30,9 @@ The repository uses Git with GitHub as the remote. The default branch is `main`.
 
 == Key Dependencies and Libraries
 
-=== ROS 2 Platform
-
 All packages target *ROS 2 Kilted* (`ros:kilted`). The build system is `colcon` with `ament_cmake` (C++) and `ament_python` (Python).
 
-=== C++ Package — `distributed_satellite_sim`
-
-#table(
-  columns: (auto, auto, 1fr),
-  stroke: 0.5pt,
-  [*Dependency*], [*Source*], [*Purpose*],
-  [`rclcpp`], [ROS 2], [C++ ROS client library],
-  [`std_msgs`], [ROS 2], [Standard message types (`Float64MultiArray`)],
-  [`rosidl_default_generators`], [ROS 2], [Custom service (`ActuationCmd`) code generation],
-  [`Eigen3`], [System], [Linear algebra — state vectors and gain matrix multiplication],
-  [QuadProg++], [Vendored (`quadprogpp/`)], [Quadratic programming solver for QP-MPC],
-  [`ament_cmake_gtest`], [ROS 2 (test)], [GTest integration via ament],
-  [`launch_testing_ament_cmake`], [ROS 2 (test)], [Launch-file regression tests],
-)
-
-=== Python Package — `external_sim_bridge`
-
-#table(
-  columns: (auto, auto, 1fr),
-  stroke: 0.5pt,
-  [*Dependency*], [*Version*], [*Purpose*],
-  [`rclpy`], [ROS 2], [Python ROS client library],
-  [`std_msgs`], [ROS 2], [Shared message types with the C++ package],
-  [`numpy`], [System (`python3-numpy`)], [Linear dynamics in `FakeBackend`],
-  [`Basilisk`], [`bsk==2.10.0`], [High-fidelity physics engine (optional; `BasiliskBackend` only)],
-  [`pytest`], [System], [Unit and integration test runner],
-  [`setuptools`], [System], [Python package installation],
-)
+The C++ package (`distributed_satellite_sim`) depends on `rclcpp` and the standard ROS 2 message types, `Eigen3` for linear algebra, and a vendored copy of the QuadProg++ solver. The Python package (`external_sim_bridge`) depends on `rclpy`, `numpy`, and optionally Basilisk (`bsk==2.10.0`) for high-fidelity physics simulation. See @appendix-dependencies for the full dependency manifest.
 
 == Deployment Instructions
 
@@ -93,63 +64,15 @@ Open the repository in VS Code and reopen in the devcontainer for your platform 
 rosdep update && rosdep install --from-paths src --ignore-src -y
 ```
 
-Build and run the simulation locally:
-
-```bash
-source /opt/ros/kilted/setup.bash
-colcon build --packages-select distributed_satellite_sim external_sim_bridge
-source install/setup.bash
-
-# DLQR simulation
-ros2 launch distributed_satellite_sim sim.launch.py
-
-# QP-MPC simulation
-ros2 launch distributed_satellite_sim qp_mpc_launch.py
-
-# Bridge simulation (fake backend, no Basilisk required)
-ros2 launch external_sim_bridge bridge_sim.launch.py backend_type:=fake
-
-# Bridge simulation (Basilisk backend)
-ros2 launch external_sim_bridge bridge_sim.launch.py backend_type:=basilisk
-```
+Four launch configurations are provided: `sim.launch.py` (DLQR), `qp_mpc_launch.py` (QP-MPC), and `bridge_sim.launch.py` with either `backend_type:=fake` or `backend_type:=basilisk`. See @appendix-launch-commands for the full build and launch commands.
 
 === Environment Variables
 
-#table(
-  columns: (auto, auto, 1fr),
-  stroke: 0.5pt,
-  [*Variable*], [*Default*], [*Description*],
-  [`ROLE`], [_(required)_], [`ENV` starts the environment node; `GNC` starts the GNC node],
-  [`ROS_DOMAIN_ID`], [`42`], [ROS 2 domain isolation],
-  [`ROS_AUTOMATIC_DISCOVERY_RANGE`], [`SUBNET`], [`LOCALHOST` in devcontainer; `SUBNET` in compose],
-  [`ROS_DISCOVERY_PEER`], [_(unset)_], [Comma-separated unicast peer IPs/hostnames],
-  [`ROS_AUTO_TAILSCALE_PEER`], [`1`], [Auto-configure Zenoh unicast peer from Tailscale hostnames],
-  [`TAILSCALE_SIM_NAME_ENV`], [`astro-sim-env`], [Tailscale hostname of the ENV machine],
-  [`TAILSCALE_SIM_NAME_GNC`], [`astro-sim-gnc`], [Tailscale hostname of the GNC machine],
-  [`TS_AUTHKEY`], [_(required for demo)_], [Tailscale authentication key — never commit],
-  [`MAX_STEPS`], [`91`], [Simulation step count passed to `env_node`],
-  [`MIN_SUBSCRIBERS`], [`1`], [Startup subscriber barrier for `env_node`],
-  [`SIM_RATE_MS`], [`100`], [Simulation timer period in milliseconds],
-  [`ASTRO_EXPECT_BASILISK`], [_(unset)_], [Set to `1` to hard-fail CI if Basilisk is missing],
-)
+Two variables are required at runtime: `ROLE` (either `ENV` to start the environment node or `GNC` to start the GNC node) and `TS_AUTHKEY` (Tailscale auth key, required for distributed deployment — never commit this value). See @appendix-env-vars for the full environment variable reference.
 
 === Distributed Deployment (Two-Machine Demo)
 
-`demo/compose.yaml` defines a Tailscale sidecar pattern that allows `env_node` and `gnc_node` to run on separate physical machines. ROS 2 communication is tunneled over Tailscale using `rmw_zenoh_cpp` (TCP unicast, port 7447).
-
-*Machine 1 — ENV role:*
-```bash
-export TS_AUTHKEY='tskey-auth-...'
-docker compose -f demo/compose.yaml --profile env up
-```
-
-*Machine 2 — GNC role:*
-```bash
-export TS_AUTHKEY='tskey-auth-...'
-docker compose -f demo/compose.yaml --profile gnc up
-```
-
-Each profile starts a Tailscale sidecar alongside the satellite container, which shares the sidecar's network namespace via `network_mode: service:tailscale-*`. The entrypoint auto-detects peer hostnames via Tailscale DNS when `ROS_AUTO_TAILSCALE_PEER=1`. If the host does not expose `/dev/net/tun`, set `TS_USERSPACE=true` to use Tailscale's userspace networking mode.
+`demo/compose.yaml` defines a Tailscale sidecar pattern allowing `env_node` and `gnc_node` to run on separate physical machines. Each machine runs its role profile with a Tailscale auth key; ROS 2 communication is tunneled over Tailscale via `rmw_zenoh_cpp` on TCP port 7447. See @appendix-distributed-deployment for the step-by-step deployment procedure.
 
 === Running Tests
 
@@ -173,20 +96,7 @@ A 91-row, 6-column CSV file containing the ground-truth DLQR state trajectory us
 
 === ROS 2 Parameter Configuration Files
 
-Runtime behavior is configured via YAML parameter files loaded at launch time:
-
-#table(
-  columns: (auto, 1fr),
-  stroke: 0.5pt,
-  [*File*], [*Contents*],
-  [`config/dlqr_params.yaml`],
-  [`timer_period_ms: 100`, `max_steps: 91`, `enable_docking_check: false`, initial state `X0`],
-
-  [`config/qp_mpc_params.yaml`],
-  [`timer_period_ms: 30000` (30 s/step), `max_steps: 1000`, `enable_docking_check: true`, explicit `Ad` (6×6) and `Bd` (6×3) matrices for HCW at $T_s = 30$ s, $R_e = 6371$ km, $R_o = 650$ km],
-)
-
-Parameter changes are made by editing these YAML files or by passing ROS 2 launch arguments at startup (e.g., `ros2 launch ... max_steps:=200`). There are no migration steps.
+Runtime behavior is configured via YAML parameter files loaded at launch time. `config/dlqr_params.yaml` sets the timer period, step count, docking check flag, and initial state. `config/qp_mpc_params.yaml` additionally embeds the discrete-time `Ad` and `Bd` system matrices for the HCW equations at the chosen orbital parameters. Parameter changes are made by editing these files or passing ROS 2 launch arguments (e.g., `ros2 launch ... max_steps:=200`). There are no migration steps.
 
 ---
 
@@ -268,19 +178,4 @@ In distributed deployment, the two sides of either mode run in separate containe
 
 === CI/CD Pipeline
 
-#table(
-  columns: (auto, 1fr),
-  stroke: 0.5pt,
-  [*Workflow*], [*Trigger and Action*],
-  [`build-base-image.yml`],
-  [Push to `main` touching `.devcontainer/base.Dockerfile` → build and push `ghcr.io/accommodus/astro:latest` (amd64 + arm64)],
-
-  [`build-distributed-satellite-sim-image.yml`],
-  [Push to `main` touching `.docker/` or `src/DistributedSatelliteSim/` → build and push the deployment image (amd64 + arm64)],
-
-  [`validate-external-sim-bridge.yml`],
-  [Push or PR touching either `src/` package → build both packages with colcon, install `bsk==2.10.0`, run `external_sim_bridge` tests],
-
-  [`track-issues.yml`],
-  [Issue opened / PR opened or closed → auto-create issue branch, open draft PR, auto-close and delete branch on merge],
-)
+Four GitHub Actions workflows handle CI/CD: two build and push the devcontainer and deployment images on changes to their respective Dockerfiles, one validates both ROS packages by building with colcon and running the test suite on every push or PR touching `src/`, and one automates issue and PR branch lifecycle management. See @appendix-cicd for the full workflow table.
