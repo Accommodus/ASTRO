@@ -2,7 +2,7 @@
 
 == Cannon Whitney
 
-Cannon Whitney served as project manager for ASTRO in CIS 4914, coordinating milestones, architecture decisions, and communication with the advisor and STAR Lab. He contributed to integration, documentation, and validation planning. He is completing his undergraduate studies at the University of Florida with interests in software systems and aerospace applications. After graduation he intends to pursue a career in industry or graduate study in a related technical field. Outside coursework he enjoys building tools that make complex systems easier for teammates to run and test.
+Cannon Whitney served as the Project Manager for ASTRO, where he spearheaded architectural decisions, milestone tracking, and cross-functional communication between the project advisor and the STAR Lab. Beyond leadership, he was instrumental in the project's integration, documentation, and validation phases. Cannon is completing his B.S. in Computer Science in August 2026, focusing on the intersection of software systems and aerospace. Following graduation, he will pursue a Master's in Computer Science at CU Boulder before joining the Air Force Research Laboratory as a DoD SMART Scholar. He is particularly passionate about developing internal tools that streamline testing and deployment for complex systems.
 
 == Dylan Long
 
