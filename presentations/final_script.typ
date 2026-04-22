@@ -66,7 +66,7 @@ On the testing side, the project now includes unit, integration, and launch-base
 
 == Individual Responsibilities - Cannon Whitney
 
-My role on the project was manager and integration coordinator. I handled milestone planning, advisor communication, and decisions around how the internal ROS 2 path and the external bridge path fit together. I also contributed to documentation, demo readiness, and the overall final deliverables. A large part of my work was making sure the project stayed coherent as it expanded from the original DLQR baseline into the final multi-path system we are showing today.
+My role on the project was manager and integration coordinator. I handled milestone planning, advisor communication, and decisions around how the internal ROS 2 path and the external bridge path fit together. I also built the Docker container setup and implemented the cross-device communication workflows for both Tailscale and local LAN demos. I contributed to documentation, demo readiness, and the overall final deliverables. A large part of my work was making sure the project stayed coherent as it expanded from the original DLQR baseline into the final multi-path system we are showing today.
 
 = Dylan (Person 2)
 
