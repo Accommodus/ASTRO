@@ -31,9 +31,7 @@
 
 The bulk of this video is the live demo below. Segments:
 
-- Repository tour — `src/DistributedSatelliteSim/`, `src/external_sim_bridge/`, `demo/`, `.docker/`
 - Local run — `ros2 launch distributed_satellite_sim sim.launch.py` (DLQR) and `qp_mpc_launch.py` (QP-MPC)
-- Bridge run — `ros2 launch external_sim_bridge bridge_sim.launch.py backend_type:=fake` / `backend_type:=basilisk`
 - Two-machine demo — `demo/compose.tailscale.yaml` and `demo/compose.local.yaml`
 - Test suite — `colcon test --packages-select distributed_satellite_sim external_sim_bridge`
 
