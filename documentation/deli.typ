@@ -10,7 +10,7 @@ The current implementation satisfies the primary functional requirements for a m
 The system now provides closed-loop simulation and control operation where environment state is published, control is computed, and actuation commands are returned through ROS2. It uses standardized ROS2 topic/service communication to replace ad-hoc coupling with clearer integration boundaries, and supports launch-driven execution for repeatable startup and test automation. The package layout is modular enough to support later additions such as alternate controllers, bridge adapters, and telemetry tooling.
 
 == Current Project Status
-The project is currently in a stable, delivered baseline state on `main` for the ROS2 DLQR workflow. The previously planned testing and integration milestones have been completed and merged, and the repository now contains validated node behavior, regression checks, and deployment-oriented infrastructure.
+The project is currently in a stable, delivered baseline state on `main` for the ROS2 DLQR and MPC workflows. The previously planned testing and integration milestones have been completed and merged, and the repository now contains validated node behavior, regression checks, and deployment-oriented infrastructure.
 
 In practical terms, ASTRO has moved from architecture and initial porting into an operational baseline that can be demonstrated, tested, and incrementally expanded.
 

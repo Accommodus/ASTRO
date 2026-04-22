@@ -50,7 +50,7 @@ Run `colcon test --packages-select distributed_satellite_sim external_sim_bridge
 
 == Database schema and data migration details
 
-ASTRO does not use a relational database for runtime operation. Simulation state lives in process memory and is exchanged through ROS 2 messages and services. Persistent artifacts are files: for example, `src/DistributedSatelliteSim/test/data/dlqr_reference_trajectory.csv` (91 steps, six HCW state components) supports DLQR regression testing against standalone reference output within tolerance `1e-4`. Behavior is also configured through YAML under `src/DistributedSatelliteSim/config/` — notably `dlqr_params.yaml` and `qp_mpc_params.yaml` for timer periods, step limits, docking checks, and dynamics parameters. Changes are made by editing those files or passing launch arguments (e.g. `max_steps:=200`); there are no database migrations or ETL pipelines.
+ASTRO does not use a relational database for runtime operation. Simulation state lives in process memory and is exchanged through ROS 2 messages and services. Persistent artifacts are files: for example, `src/DistributedSatelliteSim/test/data/dlqr_reference_trajectory.csv` (91 steps, six HCW state components) supports DLQR regression testing against standalone reference output within tolerance `1e-4`. Behavior is also configured through YAML under `src/DistributedSatelliteSim/config/` -- notably `dlqr_params.yaml` and `qp_mpc_params.yaml` for timer periods, step limits, docking checks, and dynamics parameters. Changes are made by editing those files or passing launch arguments (e.g. `max_steps:=200`); there are no database migrations or ETL pipelines.
 
 == Software architecture
 
