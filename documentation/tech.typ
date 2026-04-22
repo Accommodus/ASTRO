@@ -29,8 +29,7 @@ From the repository root, after sourcing ROS 2, run `rosdep update` and `rosdep 
 Published images include the base dev environment and the simulation deployment image below. The deployment container uses `ROLE=ENV` or `ROLE=GNC`. Common variables include `ROS_DOMAIN_ID`, `MAX_STEPS`, `MIN_SUBSCRIBERS`, and `SIM_RATE_MS`. For Tailscale-based demos, `TS_AUTHKEY` and Tailscale hostname variables apply; for LAN setups, `LAN_PEER_HOST` or explicit `ROS_DISCOVERY_PEER` matter. See `demo/README.md` for full semantics. Images can be built from `.docker/distributed_satellite_sim.Dockerfile` instead of pulling. A full environment-variable table appears in @appendix-env-vars.
 
 #table(
-  columns: (auto, 1fr),
-  stroke: 0.5pt,
+  columns: 2,
   [*Image*], [*Description*],
   [`ghcr.io/accommodus/astro:latest`],
   [Base devcontainer — ROS 2 Kilted and dev tooling (`linux/amd64` and `linux/arm64`).],
@@ -60,8 +59,7 @@ At a high level, when a simulator cannot run as a native ROS 2 node, a bridge ma
 The minimal contract is topic `env_data` (`std_msgs/Float64MultiArray`) for the six-element state each step, and service `actuation_cmd` for a three-axis thrust command. That lets either the C++ environment or the Python bridge stand in as the “environment” side.
 
 #table(
-  columns: (auto, auto, 1fr),
-  stroke: 0.5pt,
+  columns: 3,
   [*Node*], [*Executable*], [*Role*],
   [`EnvNode`], [`env_node`], [HCW dynamics; publishes `env_data`, serves `actuation_cmd`.],
   [`GncNode`], [`gnc_node`], [DLQR: $u = -K x$; calls `actuation_cmd`.],
@@ -77,8 +75,7 @@ The minimal contract is topic `env_data` (`std_msgs/Float64MultiArray`) for the 
 === Operating modes and deployment
 
 #table(
-  columns: (auto, 1fr),
-  stroke: 0.5pt,
+  columns: 2,
   [*Mode*], [*Description*],
   [Internal],
   [
