@@ -52,5 +52,5 @@ Biography: Include a biography of each team member, places where they have worke
 #include "user.typ"
 #include "transition.typ"
 #include "ack.typ"
-#include "appendix.typ"
 #include "bio.typ"
+#include "appendix.typ"

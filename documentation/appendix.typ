@@ -1,4 +1,4 @@
-= Appendices
+= Appendix
 
 == Dependency Manifest <appendix-dependencies>
 
