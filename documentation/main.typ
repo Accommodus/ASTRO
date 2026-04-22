@@ -48,4 +48,6 @@ Biography: Include a biography of each team member, places where they have worke
 #include "overview.typ"
 #include "deli.typ"
 #include "tech.typ"
+#include "ack.typ"
 #include "appendix.typ"
+#include "bio.typ"
