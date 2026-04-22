@@ -10,4 +10,4 @@ The project remains viable as long as the ASTRO repository is maintained: contai
 
 == Near-term next steps
 
-Close remaining enhancement items in the issue tracker, extend automated testing as new controllers or backends land, and refresh README sections whenever behavior diverges from docs. For longer-term lab adoption, follow-on work should parameterize dynamics further, harden external-simulator validation, and add operator-facing telemetry consistent with `docs/next-phase-plan.md`. The team recommends confirming priorities with the project advisor each semester.
+Close remaining enhancement items in the issue tracker, extend automated testing as new controllers or backends land, and refresh README sections whenever behavior diverges from docs. For longer-term lab adoption, follow-on work should parameterize dynamics further, harden external-simulator validation, and add operator-facing telemetry consistent with `docs/next-phase-plan.md`.
