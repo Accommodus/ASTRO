@@ -17,7 +17,7 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 
 
@@ -52,6 +52,16 @@ def generate_launch_description():
         default_value='100',
         description='Number of /rosout log entries to retain')
 
+    # When telemetry_buffer is enabled it also subscribes to env_data, so the
+    # startup gate must require at least 2 subscribers (gnc_node + buffer) to
+    # prevent the observer-only node from satisfying the gate before gnc_node
+    # is ready and altering the closed-loop trajectory.
+    effective_min_subscribers = PythonExpression([
+        'max(int("', LaunchConfiguration('min_subscribers'), '"), 2)'
+        ' if "', LaunchConfiguration('enable_telemetry_buffer'), '" == "true"'
+        ' else int("', LaunchConfiguration('min_subscribers'), '")',
+    ])
+
     env_node = Node(
         package='distributed_satellite_sim',
         executable='env_node',
@@ -59,7 +69,7 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'max_steps': LaunchConfiguration('max_steps'),
-            'min_subscribers': LaunchConfiguration('min_subscribers'),
+            'min_subscribers': effective_min_subscribers,
         }],
     )
 

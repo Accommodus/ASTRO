@@ -39,7 +39,9 @@ def generate_test_description():
         output='screen',
         parameters=[{
             'max_steps': 20,
-            'min_subscribers': 1,
+            # buffer_node also subscribes to env_data, so require both
+            # gnc_node and buffer_node before the startup gate opens
+            'min_subscribers': 2,
         }],
     )
 
@@ -126,11 +128,17 @@ class TestTelemetryBufferNodes(unittest.TestCase):
                 client.wait_for_service(timeout_sec=10.0),
                 'get_recent_actuation_history service not available')
 
+            # Allow actuation_applied messages to accumulate in the buffer
+            time.sleep(3.0)
+
             request = GetRecentActuationHistory.Request()
             request.limit = 0
             response = self._call_service(client, request)
 
             self.assertIsNotNone(response, 'Service call did not complete')
+            self.assertGreater(
+                len(response.entries), 0,
+                'Expected at least one actuation history entry')
             self.assertEqual(response.capacity, 50)
             self.assertEqual(response.total_buffered, len(response.entries))
             for entry in response.entries:
