@@ -7,7 +7,7 @@ This includes a functional environment node (`env_node`) and guidance, navigatio
 
 == Implemented Functional Specifications
 The current implementation satisfies the primary functional requirements for a modular digital-twin baseline.
-The system now provides closed-loop simulation and control operation where environment state is published, control is computed, and actuation commands are returned through ROS2. It uses standardized ROS2 topic/service communication to replace ad-hoc coupling with clearer integration boundaries, and supports launch-driven execution for repeatable startup and test automation. The package layout is modular enough to support later additions such as alternate controllers, bridge adapters, and telemetry tooling.
+The system now provides closed-loop simulation and control operation where environment state is published, control is computed, and actuation commands are returned through ROS2. It uses standardized ROS2 topic/service communication to replace ad-hoc coupling with clearer integration boundaries, and supports launch-driven execution for repeatable startup and test automation. The package layout is modular enough to support some of our recent additions such as alternate controllers, bridge adapters, and telemetry tooling.
 
 == Current Project Status
 The project is currently in a stable, delivered baseline state on `main` for the ROS2 DLQR and MPC workflows. The previously planned testing and integration milestones have been completed and merged, and the repository now contains validated node behavior, regression checks, and deployment-oriented infrastructure.
@@ -15,8 +15,4 @@ The project is currently in a stable, delivered baseline state on `main` for the
 In practical terms, ASTRO has moved from architecture and initial porting into an operational baseline that can be demonstrated, tested, and incrementally expanded.
 
 == Remaining Work, Backlog, and Risks
-The remaining backlog is now focused on expansion and long-term robustness rather than baseline feasibility.
-
-The two active backlog items are Issue `#24`, which focuses on validating the generic external simulator bridge against Basilisk, and Issue `#25`, which adds a circular telemetry and log buffer node for operator tooling and debugging support.
-
-The primary risks are integration complexity during bridge validation, since external simulator interfaces and timing behavior may differ from the current internal ROS2 baseline, and potential runtime overhead from telemetry/logging features that could affect deterministic control-loop behavior. There is also a maintainability risk as the project grows beyond DLQR-centric assumptions, which reinforces the need for strict interface contracts and clean configuration boundaries.
+The remaining backlog is now focused on expansion and long-term robustness rather than baseline feasibility. With the conclusion of the Issues `#24` and `#25` Basilisk has been verified and circular telemetry has been added for tooling and debugging support. At the point in time we have no open issues, but are open to further expansion as it becomes necessary. There is also a maintainability risk as the project grows beyond DLQR-centric assumptions, which reinforces the need for strict interface contracts and clean configuration boundaries.

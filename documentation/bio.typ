@@ -10,4 +10,4 @@ Dylan Long served as SCRUM master for the team, facilitating meetings, maintaini
 
 == Caleb Jackson
 
-Caleb Jackson focused on backend and ROS 2 implementation work, including package structure, nodes, topics and services, and test harnessing alongside reference ports. He is an undergraduate at the University of Florida with interests in guidance, navigation, and control, and in bridging simulation with hardware. He aims to continue in aerospace or robotics software after graduation, whether in industry or through advanced study. He enjoys digging into build and runtime issues until graphs behave predictably end to end.
+In this project Caleb focused on backend and ROS 2 implementation work, including package structure, nodes, topics and services, and test harnessing alongside reference ports. He is about to graduate with interests in game design, cybersecurity, and other online development. This project was an interesting change from his typical scene but nonetheless he enjoyed learning about something entirely new.
