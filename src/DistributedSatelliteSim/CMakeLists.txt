@@ -119,6 +119,11 @@ install(DIRECTORY launch/
   DESTINATION share/${PROJECT_NAME}/launch
 )
 
+install(FILES
+  test/data/dlqr_reference_trajectory.csv
+  DESTINATION share/${PROJECT_NAME}/test/data
+)
+
 install(DIRECTORY config/
   DESTINATION share/${PROJECT_NAME}/config
 )
