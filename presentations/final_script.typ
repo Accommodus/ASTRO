@@ -22,11 +22,11 @@ The core problem we are addressing is that the lab's simulation and control work
 
 Today's presentation is mostly a live walkthrough of the working software. We will briefly frame the project, then walk through the repository, show the local controller runs, show the external simulator bridge, show the two-machine deployment setup, and end with contributions and wrap-up.
 
-= Dylan (Person 2)
+= Cannon (Person 1)
 
 == Project Walkthrough - Live Demo Plan
 
-The biggest change since the earlier demo is that we are no longer showing only the original DLQR baseline. We now have a broader final project story to demonstrate.
+The biggest change since the earlier demo is that we are no longer showing only the original DLQR baseline. We now have a broader final project story to demonstrate, and I will go directly into that live demo as soon as we leave this slide.
 
 First, we will show the repository layout, including the internal ROS 2 package, the external simulator bridge package, the deployment files under `demo/`, and the Docker support under `.docker/`.
 
@@ -37,18 +37,6 @@ Third, we will show the bridge path, where `external_sim_bridge` can stand in fo
 Fourth, we will show the two-machine deployment configuration, including both Tailscale and local LAN Compose setups.
 
 Finally, we will show the test suite that validates both the internal package and the bridge package.
-
-== Project Walkthrough - Architecture
-
-At a high level, ASTRO now supports two operating modes.
-
-In the internal ROS 2 mode, `env_node` publishes state on `env_data`, and either `gnc_node` for DLQR or `qp_gnc_node` for QP-MPC computes thrust and sends it back through `actuation_cmd`.
-
-In the bridge mode, `bridge_node` from `external_sim_bridge` takes over the environment role but keeps the same ROS contract. That means the control side does not have to change when we swap between a native environment and an external simulator backend.
-
-That is important because it shows the project grew beyond a single controller demo. Since the residential showcase, we completed the QP-MPC controller integration, validated the external simulator bridge against both fake and Basilisk backends, and added cleaner deployment support for both local LAN and Tailscale-based two-host demos.
-
-= Caleb (Person 3)
 
 == Project Walkthrough - Live Software Segments
 
@@ -62,6 +50,18 @@ On the deployment side, we now support both a Tailscale-based cross-network setu
 
 On the testing side, the project now includes unit, integration, and launch-based validation for both the internal ROS 2 package and the bridge package.
 
+= Dylan (Person 2)
+
+== Project Walkthrough - Architecture
+
+At a high level, ASTRO now supports two operating modes.
+
+In the internal ROS 2 mode, `env_node` publishes state on `env_data`, and either `gnc_node` for DLQR or `qp_gnc_node` for QP-MPC computes thrust and sends it back through `actuation_cmd`.
+
+In the bridge mode, `bridge_node` from `external_sim_bridge` takes over the environment role but keeps the same ROS contract. That means the control side does not have to change when we swap between a native environment and an external simulator backend.
+
+That is important because it shows the project grew beyond a single controller demo. Since the residential showcase, we completed the QP-MPC controller integration, validated the external simulator bridge against both fake and Basilisk backends, and added cleaner deployment support for both local LAN and Tailscale-based two-host demos.
+
 = Cannon (Person 1)
 
 == Individual Responsibilities - Cannon Whitney
@@ -72,13 +72,13 @@ My role on the project was manager and integration coordinator. I handled milest
 
 == Individual Responsibilities - Dylan Long
 
-My role was SCRUM master and repository and deployment support. I maintained the sprint workflow, task tracking, and review flow in GitHub. I also worked on devcontainers, deployment-image support, documentation, and demo guidance. That became especially important as the project moved beyond a single local run and into a setup that needed to support bridge validation and reproducible multi-machine demos.
+My role was SCRUM master, but my GitHub work also included a large share of the implementation and validation work. I built the initial ROS 2 package skeleton and `env_node`, expanded the test coverage with environment, GNC, and reference-trajectory validation, and then implemented `external_sim_bridge` with the `fake` and `basilisk` backends plus their validation tests. I also maintained key README and demo documentation and helped keep the repository workflow moving as the project broadened.
 
 = Caleb (Person 3)
 
 == Individual Responsibilities - Caleb Jackson
 
-My role was developer on the core implementation side. I worked on the ROS 2 node path, including the internal environment and controller implementations, the QP-MPC controller integration, and the external simulator bridge with fake and Basilisk backends. The main technical through-line in my work was keeping the control boundary stable while broadening the set of modes ASTRO can support.
+My role was developer on the advanced-controller side of the project. I integrated the QP-MPC controller path by adding `qp_gnc_node`, the supporting controller configuration and matrix files, and the related unit and launch-based tests. I also contributed technical documentation and follow-on telemetry and logging work. The main technical through-line in my work was expanding ASTRO beyond the original DLQR baseline while keeping the control interface consistent.
 
 = Cannon (Person 1)
 

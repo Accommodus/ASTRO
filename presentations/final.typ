@@ -37,7 +37,7 @@ The bulk of this video is the live demo below. Segments:
 - Two-machine demo — `demo/compose.tailscale.yaml` and `demo/compose.local.yaml`
 - Test suite — `colcon test --packages-select distributed_satellite_sim external_sim_bridge`
 
-#speaker-note[Cut to screen share here. Keep each segment tight; don't narrate anything you are not actively doing on screen.]
+#speaker-note[Cannon cuts to screen share immediately after this slide and runs the live demo. Keep each segment tight; don't narrate anything you are not actively doing on screen.]
 
 == Architecture
 
@@ -46,33 +46,33 @@ The bulk of this video is the live demo below. Segments:
   internal-arch,
 )
 
-#speaker-note[One breath of context before returning to the live walkthrough.]
+#speaker-note[Use this slide immediately after the live demo as a short recap of what the audience just saw.]
 
 = Individual Responsibilities
 
 == Cannon Whitney — Manager
 
-- Coordinated milestones, advisor communication, and validation scheduling
-- Drove integration decisions for the internal vs bridge paths
-- Contributed to documentation, demo readiness, and report deliverables
+- Coordinated milestones, advisor communication, and overall integration planning
+- Implemented the original `gnc_node` / DLQR control path and helped steer the internal-vs-bridge architecture
+- Owned deployment/runtime integration, including the deployment image and the Tailscale / local-LAN demo setups
 
-#speaker-note[Cannon introduces himself and briefly states what he personally shipped this semester.]
+#speaker-note[Cannon introduces himself and briefly states the management and integration work he personally shipped this semester.]
 
 == Dylan Long — SCRUM Master
 
-- Ran sprint cadence, task board, and reviews on the GitHub repository
-- Maintained devcontainers, deployment image, and repo automation
-- Authored and refined user-facing documentation and demo guides
+- Ran sprint cadence, GitHub issue flow, and review coordination
+- Built the initial ROS 2 package skeleton and `env_node`, then expanded testing and validation coverage
+- Designed and implemented `external_sim_bridge`, including the `fake` / `basilisk` backends and their validation tests
 
-#speaker-note[Dylan speaks to process and deployment pieces he owned.]
+#speaker-note[Dylan speaks to the process, validation, and bridge work he owned.]
 
 == Caleb Jackson — Developer
 
-- Built the ROS 2 package layout and node implementations (`env_node`, `gnc_node`, `qp_gnc_node`)
-- Ported DLQR and integrated the QP-MPC controller path with QuadProg++
-- Implemented the `external_sim_bridge` and its `fake` / `basilisk` backends
+- Integrated the QP-MPC controller path with QuadProg++
+- Added `qp_gnc_node`, its launch/config support, and controller test coverage
+- Contributed technical documentation and follow-on telemetry / logging work
 
-#speaker-note[Caleb highlights the core ROS 2 implementation work and the bridge.]
+#speaker-note[Caleb highlights the advanced-controller work and related technical contributions he owned.]
 
 = Wrap-up
 
