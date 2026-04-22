@@ -1,0 +1,5 @@
+uint32 limit
+---
+rcl_interfaces/Log[] entries
+uint32 total_buffered
+uint32 capacity

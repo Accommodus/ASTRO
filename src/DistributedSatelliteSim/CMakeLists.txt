@@ -8,12 +8,20 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(builtin_interfaces REQUIRED)
+find_package(rcl_interfaces REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
-# ---------- Generate service interfaces ----------
+# ---------- Generate message and service interfaces ----------
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/StateSample.msg"
+  "msg/ActuationSample.msg"
   "srv/ActuationCmd.srv"
+  "srv/GetRecentEnvHistory.srv"
+  "srv/GetRecentActuationHistory.srv"
+  "srv/GetRecentLogHistory.srv"
+  DEPENDENCIES builtin_interfaces rcl_interfaces
 )
 
 rosidl_get_typesupport_target(typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
@@ -78,8 +86,33 @@ ament_target_dependencies(qp_gnc_node
 )
 target_link_libraries(qp_gnc_node quadprogpp "${typesupport_target}")
 
-install(TARGETS env_node gnc_node qp_gnc_node
+# ---------- Telemetry Buffer Node library (testable) ----------
+add_library(telemetry_buffer_node_lib SHARED
+  src/telemetry_buffer_node.cpp
+)
+target_include_directories(telemetry_buffer_node_lib PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(telemetry_buffer_node_lib
+  ${std_msgs_TARGETS}
+  ${rcl_interfaces_TARGETS}
+  rclcpp::rclcpp
+  "${typesupport_target}"
+)
+
+# ---------- Telemetry Buffer Node executable ----------
+add_executable(telemetry_buffer_node src/telemetry_buffer_node.cpp)
+target_link_libraries(telemetry_buffer_node telemetry_buffer_node_lib)
+
+install(TARGETS env_node gnc_node qp_gnc_node telemetry_buffer_node
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(TARGETS telemetry_buffer_node_lib
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
 install(DIRECTORY launch/
@@ -119,8 +152,22 @@ if(BUILD_TESTING)
   )
   target_link_libraries(test_env_node env_node_lib)
 
+  ament_add_gtest(test_telemetry_buffer_node
+    test/test_telemetry_buffer_node.cpp
+    APPEND_LIBRARY_DIRS ${CMAKE_CURRENT_BINARY_DIR}
+  )
+  target_link_libraries(test_telemetry_buffer_node
+    env_node_lib
+    telemetry_buffer_node_lib
+  )
+
   add_launch_test(
     test/test_dlqr_reference_launch.py
+    TIMEOUT 60
+  )
+
+  add_launch_test(
+    test/test_telemetry_buffer_launch.py
     TIMEOUT 60
   )
 
