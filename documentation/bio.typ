@@ -6,7 +6,7 @@ Cannon Whitney served as the Project Manager for ASTRO, where he spearheaded arc
 
 == Dylan Long
 
-Dylan Long served as SCRUM master for the team, facilitating meetings, maintaining task visibility, and supporting repository hygiene including reviews and GitHub workflows. He contributed across documentation, deployment scripting, and cross-cutting engineering tasks. He is an undergraduate at the University of Florida with interests in robotics middleware and dependable software delivery. He plans to seek roles where he can continue improving how teams ship and operate embedded and distributed systems. He relaxes by staying organized and iterating on team processes that actually get used.
+Dylan Long served as SCRUM master for the team, facilitating meetings, maintaining task visibility, and supporting repository hygiene including reviews and GitHub workflows. He contributed across documentation, deployment scripting, and cross-cutting engineering tasks. He is a computer science student at the University of Florida with interests in web-dev, robotics, AI, and all things tech. He plans to seek roles where he can continue improving how teams ship and operate software. He relaxes by keeping up to date on the field of Computer Science.
 
 == Caleb Jackson
 
