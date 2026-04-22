@@ -15,7 +15,7 @@ Cannon Whitney, Dylan Long, and Caleb Jackson
   grid.vline(x: 0, position: end),
   emph[Project Information:], [],
   [Title], [ASTRO: Autonomous Satellite Test & Robotics Operations],
-  [Team Name], [ROS2],
+  [Team Name], [ASTRO],
   grid.hline(),
   emph[Advisor Information:],[],
   [Name], [Dr. Christopher “Chrispy” Petersen],

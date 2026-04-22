@@ -27,3 +27,15 @@ New ROS2 packages should live under `src/`, declare dependencies in `package.xml
 Align new nodes with the established graph boundaries: the baseline publishes simulated state on `env_data` and exchanges actuator commands through the `actuation_cmd` service type defined in `distributed_satellite_sim`. Reuse those interfaces when extending the digital twin so multiple lab projects can interoperate without ad hoc sockets. Expose tunable behavior through ROS2 parameters and YAML where possible rather than hardcoding dynamics, gains, or timing in node sources, so launch files and tests can reproduce scenarios. When adding launch files, mirror the patterns in `sim.launch.py` (explicit arguments such as `max_steps` and `min_subscribers`, clear defaults) and extend the package test suite with `colcon test` so regressions remain detectable in CI and on developer machines.
 
 For distributed or containerized runs, keep `ROS_DOMAIN_ID` and discovery-related variables consistent with the demo compositions documented above; new packages that introduce additional topics or services should document their names and QoS expectations beside the existing `env_data` / `actuation_cmd` contract.
+
+== Training materials and screenshots
+
+Operator training should combine this chapter with a short live demo: start `env_node` and `gnc_node` locally, show `ros2 topic echo /env_data`, and walk through one distributed run using `demo/README.md`. Screenshots of RViz, Foxglove, or terminal sessions are not embedded in this PDF build; add figures to a slide deck or print appendix if your course requires visual evidence. Video of the final presentation is linked from the title page.
+
+== Frequently asked questions
+
+*Why Zenoh instead of default DDS across two laptops?* Multicast discovery is unreliable across NAT, Docker Desktop, and many lab networks; the deployment image configures `rmw_zenoh_cpp` with explicit peers so ENV and GNC containers find each other.
+
+*Which compose file should I use?* Use `compose.tailscale.yaml` when hosts are on different networks or you want Tailscale; use `compose.local.yaml` on one LAN with `LAN_PEER_HOST` pointing at the peer.
+
+*Where do I change simulation length?* Use launch arguments (e.g. `max_steps`) or YAML under `src/DistributedSatelliteSim/config/` as described in the Technical Details and appendices.

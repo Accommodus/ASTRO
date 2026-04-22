@@ -4,7 +4,7 @@
 
 Unless noted otherwise, paths are relative to the ASTRO repository root on the `main` branch. Project reports, presentations, and Typst manuscripts may live on a separate branch (for example `no-merge/manuscripts`) alongside the software; the implementation described here tracks `main`.
 
-== Codebase overview
+== Codebase overview (repositories, branches, version control)
 
 ASTRO is developed in a single public GitHub repository, #link("https://github.com/Accommodus/ASTRO")[Accommodus/ASTRO], with default branch `main`. Work is coordinated through Git branches, pull requests, and GitHub Issues.
 
@@ -16,20 +16,21 @@ The C++ package uses `ament_cmake`, `rclcpp`, `std_msgs`, and `rosidl` generator
 
 The Python bridge package depends on `rclpy`, `std_msgs`, `numpy`, optional Basilisk (`bsk==2.10.0`), `pytest`, and `setuptools`.
 
-Building from source assumes ROS 2 Kilted, `colcon`, `rosdep`, Eigen3, and a C++17 compiler. For distributed deployments, the published runtime uses Eclipse Zenoh (`rmw_zenoh_cpp`) so peers can discover each other across hosts without relying solely on multicast DDS across routed networks; peers are configured via environment variables and the stacks described in `demo/README.md`.
+Building from source assumes ROS 2 Kilted, `colcon`, `rosdep`, Eigen3, and a C++17 compiler. For distributed deployments, the published runtime uses Eclipse Zenoh (`rmw_zenoh_cpp`) so peers can discover each other across hosts without relying solely on multicast DDS across routed networks; peers are configured via environment variables and the stacks described in `demo/README.md`. A tabular dependency manifest appears in @appendix-dependencies.
 
-== Deployment instructions
+== Deployment instructions (environment details, configuration)
 
 === Local development
 
-From the repository root, after sourcing ROS 2, run `rosdep update` and `rosdep install --from-paths src --ignore-src -y`, then `colcon build --packages-select distributed_satellite_sim external_sim_bridge` (or a subset), then `source install/setup.bash`. Typical launches include `ros2 launch distributed_satellite_sim sim.launch.py` (DLQR), `ros2 launch distributed_satellite_sim qp_mpc_launch.py` (QP-MPC), and `ros2 launch external_sim_bridge bridge_sim.launch.py` with `backend_type:=fake` or `backend_type:=basilisk`. Launch arguments such as `max_steps` and `min_subscribers` control run length and startup synchronization. Devcontainers under `.devcontainer/` automate `rosdep` on first open where configured.
+From the repository root, after sourcing ROS 2, run `rosdep update` and `rosdep install --from-paths src --ignore-src -y`, then `colcon build --packages-select distributed_satellite_sim external_sim_bridge` (or a subset), then `source install/setup.bash`. Typical launches include `ros2 launch distributed_satellite_sim sim.launch.py` (DLQR), `ros2 launch distributed_satellite_sim qp_mpc_launch.py` (QP-MPC), and `ros2 launch external_sim_bridge bridge_sim.launch.py` with `backend_type:=fake` or `backend_type:=basilisk`. Launch arguments such as `max_steps` and `min_subscribers` control run length and startup synchronization. Devcontainers under `.devcontainer/` automate `rosdep` on first open where configured. Copy-paste build and launch commands are collected in @appendix-launch-commands.
 
 === Containers
 
-Published images include the base dev environment and the simulation deployment image below. The deployment container uses `ROLE=ENV` or `ROLE=GNC`. Common variables include `ROS_DOMAIN_ID`, `MAX_STEPS`, `MIN_SUBSCRIBERS`, and `SIM_RATE_MS`. For Tailscale-based demos, `TS_AUTHKEY` and Tailscale hostname variables apply; for LAN setups, `LAN_PEER_HOST` or explicit `ROS_DISCOVERY_PEER` matter. See `demo/README.md` for full semantics. Images can be built from `.docker/distributed_satellite_sim.Dockerfile` instead of pulling.
+Published images include the base dev environment and the simulation deployment image below. The deployment container uses `ROLE=ENV` or `ROLE=GNC`. Common variables include `ROS_DOMAIN_ID`, `MAX_STEPS`, `MIN_SUBSCRIBERS`, and `SIM_RATE_MS`. For Tailscale-based demos, `TS_AUTHKEY` and Tailscale hostname variables apply; for LAN setups, `LAN_PEER_HOST` or explicit `ROS_DISCOVERY_PEER` matter. See `demo/README.md` for full semantics. Images can be built from `.docker/distributed_satellite_sim.Dockerfile` instead of pulling. A full environment-variable table appears in @appendix-env-vars.
 
 #table(
-  columns: 2,
+  columns: (auto, 1fr),
+  stroke: 0.5pt,
   [*Image*], [*Description*],
   [`ghcr.io/accommodus/astro:latest`],
   [Base devcontainer — ROS 2 Kilted and dev tooling (`linux/amd64` and `linux/arm64`).],
@@ -42,7 +43,7 @@ CI rebuilds these when the corresponding Dockerfiles or package paths change.
 
 === Two-machine demo
 
-Run Compose from `demo/` so paths resolve. Use `compose.tailscale.yaml` with `TS_AUTHKEY` and profiles `env` / `gnc` on separate hosts, or `compose.local.yaml` on a shared LAN with host networking and `LAN_PEER_HOST` (or `ROS_DISCOVERY_PEER`). Zenoh carries discovery and traffic per `demo/README.md` (including port 7447 on LAN setups). If `/dev/net/tun` is unavailable on the host, `TS_USERSPACE=true` may be required for Tailscale.
+Run Compose from `demo/` so paths resolve. Use `compose.tailscale.yaml` with `TS_AUTHKEY` and profiles `env` / `gnc` on separate hosts, or `compose.local.yaml` on a shared LAN with host networking and `LAN_PEER_HOST` (or `ROS_DISCOVERY_PEER`). Zenoh carries discovery and traffic per `demo/README.md` (including port 7447 on LAN setups). If `/dev/net/tun` is unavailable on the host, `TS_USERSPACE=true` may be required for Tailscale. Step-by-step commands are in @appendix-distributed-deployment.
 
 === Tests
 
@@ -59,7 +60,8 @@ At a high level, when a simulator cannot run as a native ROS 2 node, a bridge ma
 The minimal contract is topic `env_data` (`std_msgs/Float64MultiArray`) for the six-element state each step, and service `actuation_cmd` for a three-axis thrust command. That lets either the C++ environment or the Python bridge stand in as the “environment” side.
 
 #table(
-  columns: 3,
+  columns: (auto, auto, 1fr),
+  stroke: 0.5pt,
   [*Node*], [*Executable*], [*Role*],
   [`EnvNode`], [`env_node`], [HCW dynamics; publishes `env_data`, serves `actuation_cmd`.],
   [`GncNode`], [`gnc_node`], [DLQR: $u = -K x$; calls `actuation_cmd`.],
@@ -75,7 +77,8 @@ The minimal contract is topic `env_data` (`std_msgs/Float64MultiArray`) for the 
 === Operating modes and deployment
 
 #table(
-  columns: 2,
+  columns: (auto, 1fr),
+  stroke: 0.5pt,
   [*Mode*], [*Description*],
   [Internal],
   [
@@ -93,7 +96,7 @@ The minimal contract is topic `env_data` (`std_msgs/Float64MultiArray`) for the 
 
 === CI/CD workflows
 
-Workflows under `.github/workflows/` build and publish images and validate the bridge package (`build-base-image.yml`, `build-distributed-satellite-sim-image.yml`, `validate-external-sim-bridge.yml`, `track-issues.yml`); see the repository for triggers.
+Workflows under `.github/workflows/` build and publish images and validate the bridge package (`build-base-image.yml`, `build-distributed-satellite-sim-image.yml`, `validate-external-sim-bridge.yml`, `track-issues.yml`); see the repository for triggers. A workflow summary table is in @appendix-cicd.
 
 == Current limitations and tracked follow-on work
 
