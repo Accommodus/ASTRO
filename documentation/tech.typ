@@ -54,7 +54,7 @@ ASTRO does not use a relational database for runtime operation. Simulation state
 
 == Software architecture
 
-At a high level, when a simulator cannot run as a native ROS 2 node, a bridge maps external simulator I/O to the same ROS interfaces; `external_sim_bridge` implements that for selected backends. When everything runs as ROS 2 nodes, they share one graph — the primary mode on `main`.
+At a high level, when a simulator cannot run as a native ROS 2 node, a bridge maps external simulator I/O to the same ROS interfaces; `external_sim_bridge` implements that for selected backends. When everything runs as ROS 2 nodes, they share one graph.
 
 The minimal contract is topic `env_data` (`std_msgs/Float64MultiArray`) for the six-element state each step, and service `actuation_cmd` for a three-axis thrust command. That lets either the C++ environment or the Python bridge stand in as the “environment” side.
 

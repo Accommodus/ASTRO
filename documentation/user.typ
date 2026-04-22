@@ -28,10 +28,6 @@ Align new nodes with the established graph boundaries: the baseline publishes si
 
 For distributed or containerized runs, keep `ROS_DOMAIN_ID` and discovery-related variables consistent with the demo compositions documented above; new packages that introduce additional topics or services should document their names and QoS expectations beside the existing `env_data` / `actuation_cmd` contract.
 
-== Training materials and screenshots
-
-Operator training should combine this chapter with a short live demo: start `env_node` and `gnc_node` locally, show `ros2 topic echo /env_data`, and walk through one distributed run using `demo/README.md`. Screenshots of RViz, Foxglove, or terminal sessions are not embedded in this PDF build; add figures to a slide deck or print appendix if your course requires visual evidence. Video of the final presentation is linked from the title page.
-
 == Frequently asked questions
 
 *Why Zenoh instead of default DDS across two laptops?* Multicast discovery is unreliable across NAT, Docker Desktop, and many lab networks; the deployment image configures `rmw_zenoh_cpp` with explicit peers so ENV and GNC containers find each other.
