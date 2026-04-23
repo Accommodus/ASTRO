@@ -1,122 +1,138 @@
 # ASTRO
 
-ASTRO, short for **Autonomous Satellite Test & Robotics Operations**, is a ROS 2-based framework for connecting satellite simulation software and guidance, navigation, and control software in a modular way.
+ASTRO, short for **Autonomous Satellite Test & Robotics Operations**, is a ROS 2-based framework for running closed-loop satellite simulation and control software with a cleaner, more modular interface than the older ad hoc lab setup.
 
-The current `main` branch contains an initial working ROS 2 package, `distributed_satellite_sim`, which ports a DLQR-based reference scenario from the STAR Lab standalone C++ executables into native ROS 2 nodes. The broader project direction, including native ROS 2 and bridge-based architectures, is documented in the `no-merge/manuscripts` branch.
+On `main`, the repository now contains two active ROS 2 packages:
 
-## Overview
+- [`src/DistributedSatelliteSim`](src/DistributedSatelliteSim): the primary simulation-and-control package
+- [`src/external_sim_bridge`](src/external_sim_bridge): an adapter package for validating external simulator backends against the same ROS-facing interface
 
-The project is intended to replace ad hoc simulation-to-flight-software networking with a ROS 2 graph that is easier to extend, test, and integrate with other lab systems.
+## Start Here
 
-On `main`, the implemented path is:
+Use these documents in this order:
 
-- an environment node that advances the simulation state
-- a GNC node that computes control using a fixed DLQR gain matrix
-- a ROS 2 topic carrying state from environment to controller
-- a ROS 2 service carrying actuator commands from controller back to the environment
+1. **This README**: what exists on `main`, how to build it, and how to run the common paths.
+2. [`demo/README.md`](demo/README.md): two-machine Docker Compose deployment for ENV/GNC and showcase use.
+3. [`docs/next-phase-plan.md`](docs/next-phase-plan.md): current roadmap and planned next-phase work.
+4. `no-merge/manuscripts`: project proposal, reports, and broader rationale. Treat that branch as historical/project-context documentation, not as the operational source of truth for the current codebase.
 
-At a project level, the design goal is broader than the current package. The manuscript branch describes two intended deployment modes:
+## What The System Does
 
-- a fully internal ROS 2 configuration, where simulation and control both live inside the ROS 2 graph
-- an external-simulator configuration, where a bridge adapts a non-ROS simulator to the same ROS 2 interfaces
+At a high level, ASTRO connects a simulator and a controller through ROS 2:
 
-## Current package
+- an **environment node** publishes the current simulated satellite state
+- a **controller node** reads that state and computes a thrust command
+- a ROS 2 **service** sends that thrust command back to the environment
+- optional telemetry tooling records recent state, actuation, and log history
 
-The active package lives under [`src/DistributedSatelliteSim`](src/DistributedSatelliteSim).
+On `main`, that idea exists in two forms:
 
-Implemented components:
+- an internal ROS 2 simulation path inside `distributed_satellite_sim`
+- an external-simulator bridge path inside `external_sim_bridge`
 
-- `env_node`
-- `gnc_node`
-- `ActuationCmd.srv`
-- `sim.launch.py`
-- environment-node unit tests
-- GNC-node unit tests
-- launch-based DLQR reference trajectory regression test
+## Current State On `main`
 
-At the package level, the interfaces are:
+The following are implemented on `main`:
 
-- topic: `env_data`
-- service: `actuation_cmd`
-- launch arguments: `max_steps`, `min_subscribers`
-
-The current implementation is a ROS 2 port of the DLQR reference code in:
-
-- [`reference/DLQR/udp_roundtrip_discrete.cpp`](reference/DLQR/udp_roundtrip_discrete.cpp)
-- [`reference/DLQR/udp_hcw_discrete_txrx 2 1.cpp`](reference/DLQR/udp_hcw_discrete_txrx%202%201.cpp)
-
-The package currently uses a hardcoded six-state model, a three-axis control input, and a default initial state of:
-
-```text
-[20, 20, 20, 0.00930458, -0.0467472, 0.00798343]
-```
-
-Additional implementation details that are useful when modifying the package:
-
-- `env_node` advances the model on a 100 ms wall timer
-- `sim.launch.py` defaults `max_steps` to `91`
-- setting `max_steps:=0` runs the simulation without the launch-time stop condition
-- `env_node` currently owns the hardcoded `Ad` and `Bd` matrices directly in code
-- `gnc_node` currently owns the hardcoded DLQR gain matrix directly in code
-- the environment publishes `std_msgs/msg/Float64MultiArray` with six state elements
-- the actuation service uses a fixed-length `float64[3]` thrust vector
+- a validated **DLQR closed-loop baseline** with `env_node` and `gnc_node`
+- a **QP-MPC controller path** with separate launch/configuration support
+- a **telemetry buffer node** that stores recent environment, actuation, and `/rosout` log history
+- **parameterized environment dynamics** through YAML/config instead of hardcoded-only launch behavior
+- a Python **external simulator bridge** package with fake and Basilisk-oriented backends
+- **distributed deployment support** through Docker Compose for local LAN and Tailscale-based two-machine runs
+- automated tests for both packages, including unit tests and launch/integration-style tests
 
 ## Architecture
 
+### Internal ROS 2 path
+
 ```mermaid
 flowchart LR
-    ENV["env_node"] -- "env_data topic" --> GNC["gnc_node"]
+    ENV["env_node"] -- "env_data topic" --> GNC["gnc_node or qp_gnc_node"]
     GNC -- "actuation_cmd service" --> ENV
+    ENV -- "actuation_applied topic" --> BUF["telemetry_buffer_node (optional)"]
+    ENV -- "env_data topic" --> BUF
+    ROSOUT["/rosout"] --> BUF
 ```
 
-- `env_node` publishes the simulated state on `env_data`
-- `gnc_node` subscribes to `env_data`, computes `u = -Kx`, and sends thrust through `actuation_cmd`
-- `sim.launch.py` starts both nodes together
+### External bridge path
 
-In the current code, `env_node` is both the simulator and actuator sink. That is useful to keep in mind because the project-level architecture described in the manuscripts splits this more conceptually into environment dynamics, actuator modeling, and future adapter layers.
+```mermaid
+flowchart LR
+    SIM["external simulator backend"] --> BRIDGE["external_sim_bridge"]
+    BRIDGE -- "env_data topic" --> GNC["gnc_node"]
+    GNC -- "actuation_cmd service" --> BRIDGE
+```
 
-## Repository layout
+## Key Interfaces
+
+The most important ROS-facing interfaces are:
+
+- topic: `env_data`
+  Carries the six-state vector `[x, y, z, vx, vy, vz]`
+- service: `actuation_cmd`
+  Carries a fixed-length `float64[3]` thrust command
+- topic: `actuation_applied`
+  Publishes the thrust command actually stored by the environment node
+- services:
+  `/telemetry_buffer/get_recent_env_history`
+  `/telemetry_buffer/get_recent_actuation_history`
+  `/telemetry_buffer/get_recent_log_history`
+
+## Repository Layout
 
 ```text
 .
 ├── .devcontainer/
+├── .docker/
+├── demo/
+├── docs/
 ├── reference/
-│   ├── DLQR/
-│   └── QP_MPC/
 └── src/
-    └── DistributedSatelliteSim/
+    ├── DistributedSatelliteSim/
+    └── external_sim_bridge/
 ```
 
 Key directories:
 
-- [`src/DistributedSatelliteSim`](src/DistributedSatelliteSim): active ROS 2 package
-- [`reference/DLQR`](reference/DLQR): DLQR reference executables used for the current port
-- [`reference/QP_MPC`](reference/QP_MPC): QP_MPC reference code for future integration
+- [`src/DistributedSatelliteSim`](src/DistributedSatelliteSim): main ROS 2 simulation/control package
+- [`src/external_sim_bridge`](src/external_sim_bridge): external simulator adapter package
+- [`demo`](demo): two-machine Docker Compose deployment docs and configs
+- [`docs/next-phase-plan.md`](docs/next-phase-plan.md): forward-looking roadmap and planned work
+- [`reference`](reference): original reference code and supporting assets used for comparison and future controller work
 
-Within [`src/DistributedSatelliteSim`](src/DistributedSatelliteSim):
+Within [`src/DistributedSatelliteSim`](src/DistributedSatelliteSim), the main files to know are:
 
-- [`include/distributed_satellite_sim/env_node.hpp`](src/DistributedSatelliteSim/include/distributed_satellite_sim/env_node.hpp): current environment-node implementation
-- [`src/gnc_node.cpp`](src/DistributedSatelliteSim/src/gnc_node.cpp): DLQR controller node
-- [`srv/ActuationCmd.srv`](src/DistributedSatelliteSim/srv/ActuationCmd.srv): service definition
-- [`launch/sim.launch.py`](src/DistributedSatelliteSim/launch/sim.launch.py): combined launch entrypoint
-- [`test/test_env_node.cpp`](src/DistributedSatelliteSim/test/test_env_node.cpp): environment-node unit tests
-- [`test/test_gnc_node.cpp`](src/DistributedSatelliteSim/test/test_gnc_node.cpp): GNC-node unit tests
-- [`test/test_dlqr_reference_launch.py`](src/DistributedSatelliteSim/test/test_dlqr_reference_launch.py): launch-based DLQR reference trajectory regression test
-- [`test/data/dlqr_reference_trajectory.csv`](src/DistributedSatelliteSim/test/data/dlqr_reference_trajectory.csv): 91-step reference fixture from standalone DLQR executables
+- [`include/distributed_satellite_sim/env_node.hpp`](src/DistributedSatelliteSim/include/distributed_satellite_sim/env_node.hpp): environment simulation node
+- [`include/distributed_satellite_sim/gnc_node.hpp`](src/DistributedSatelliteSim/include/distributed_satellite_sim/gnc_node.hpp): DLQR controller node
+- [`include/distributed_satellite_sim/qp_gnc_node.hpp`](src/DistributedSatelliteSim/include/distributed_satellite_sim/qp_gnc_node.hpp): QP-MPC controller node
+- [`include/distributed_satellite_sim/telemetry_buffer_node.hpp`](src/DistributedSatelliteSim/include/distributed_satellite_sim/telemetry_buffer_node.hpp): circular history buffer node
+- [`config/dlqr_params.yaml`](src/DistributedSatelliteSim/config/dlqr_params.yaml): DLQR scenario configuration
+- [`config/qp_mpc_params.yaml`](src/DistributedSatelliteSim/config/qp_mpc_params.yaml): QP-MPC scenario configuration
+- [`launch/sim.launch.py`](src/DistributedSatelliteSim/launch/sim.launch.py): default DLQR launch entrypoint with optional telemetry buffer
+- [`launch/qp_mpc_launch.py`](src/DistributedSatelliteSim/launch/qp_mpc_launch.py): QP-MPC launch entrypoint
 
-## Development environment
+Within [`src/external_sim_bridge`](src/external_sim_bridge), start with:
+
+- [`external_sim_bridge/bridge_node.py`](src/external_sim_bridge/external_sim_bridge/bridge_node.py): generic bridge logic
+- [`external_sim_bridge/backends`](src/external_sim_bridge/external_sim_bridge/backends): fake and Basilisk backend implementations
+- [`launch/bridge_sim.launch.py`](src/external_sim_bridge/launch/bridge_sim.launch.py): bridge + `gnc_node` launch entrypoint
+- [`doc/design_note.md`](src/external_sim_bridge/doc/design_note.md): design contract for the bridge package
+
+## Development Environment
 
 The repository is set up for **ROS 2 Kilted** and includes OS-specific devcontainer definitions under [`.devcontainer`](.devcontainer).
 
-The Linux devcontainer is configured around the `ghcr.io/accommodus/astro:latest` image and sets `ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST` and `ROS_DOMAIN_ID=42`. Those defaults matter if you are debugging node discovery behavior or trying to compare container and non-container runs.
-
-If you are not using the devcontainer, you will need:
+If you are not using the devcontainer, install:
 
 - ROS 2 Kilted
 - `colcon`
 - `rosdep`
 - Eigen3
 - a C++17-capable compiler
+- Python dependencies required by the ROS 2 packages
+
+For the Basilisk bridge backend, you will also need the Basilisk Python runtime available in the active environment.
 
 ## Build
 
@@ -126,39 +142,78 @@ From the repository root:
 source /opt/ros/kilted/setup.bash
 rosdep update
 rosdep install --from-paths src --ignore-src -y
-colcon build --packages-select distributed_satellite_sim
+colcon build --packages-select distributed_satellite_sim external_sim_bridge
 source install/setup.bash
 ```
 
 ## Run
 
-Launch the full DLQR demo:
+### 1. Run the default DLQR baseline
 
 ```bash
 ros2 launch distributed_satellite_sim sim.launch.py
 ```
 
-Set an explicit step limit:
+Useful launch arguments:
+
+- `max_steps:=91`
+- `min_subscribers:=1`
+- `enable_telemetry_buffer:=true`
+- `env_buffer_capacity:=100`
+- `actuation_buffer_capacity:=100`
+- `log_buffer_capacity:=100`
+
+Example with telemetry enabled:
 
 ```bash
-ros2 launch distributed_satellite_sim sim.launch.py max_steps:=91
+ros2 launch distributed_satellite_sim sim.launch.py enable_telemetry_buffer:=true
 ```
 
-Run nodes individually:
+### 2. Run the QP-MPC path
 
 ```bash
-ros2 run distributed_satellite_sim env_node
-ros2 run distributed_satellite_sim gnc_node
+ros2 launch distributed_satellite_sim qp_mpc_launch.py
 ```
 
-Useful inspection commands:
+This path uses [`config/qp_mpc_params.yaml`](src/DistributedSatelliteSim/config/qp_mpc_params.yaml), including a different timestep and docking-check settings than the default DLQR launch.
+
+### 3. Run the external bridge path
+
+Use the deterministic fake backend when you want a bridge-only validation path without Basilisk:
+
+```bash
+ros2 launch external_sim_bridge bridge_sim.launch.py backend_type:=fake
+```
+
+Use the Basilisk backend only when its runtime dependency is installed:
+
+```bash
+ros2 launch external_sim_bridge bridge_sim.launch.py backend_type:=basilisk
+```
+
+### 4. Run the two-machine deployment
+
+For Docker Compose deployment across two machines, use [`demo/README.md`](demo/README.md). That is the source of truth for:
+
+- local LAN runs
+- Tailscale-based runs
+- `ENV` versus `GNC` roles
+- `ROS_DISCOVERY_PEER`, `LAN_PEER_HOST`, and related runtime variables
+
+### Useful inspection commands
 
 ```bash
 ros2 topic echo /env_data
-ros2 service call /actuation_cmd distributed_satellite_sim/srv/ActuationCmd "{thrust: [0.0, 0.0, 0.0]}"
+ros2 topic echo /actuation_applied
+ros2 service list
 ```
 
-When running nodes individually, start `env_node` first so the `actuation_cmd` service exists before `gnc_node` begins trying to send requests.
+Example telemetry queries:
+
+```bash
+ros2 service call /telemetry_buffer/get_recent_env_history distributed_satellite_sim/srv/GetRecentEnvHistory "{limit: 5}"
+ros2 service call /telemetry_buffer/get_recent_actuation_history distributed_satellite_sim/srv/GetRecentActuationHistory "{limit: 5}"
+```
 
 ## Testing
 
@@ -166,48 +221,61 @@ Run the package tests with:
 
 ```bash
 source /opt/ros/kilted/setup.bash
-colcon test --packages-select distributed_satellite_sim
+colcon test --packages-select distributed_satellite_sim external_sim_bridge
 colcon test-result --verbose
 ```
 
-The current tests cover:
+Current automated coverage includes:
 
-- **Env-node unit tests**: zero-thrust propagation, non-zero-thrust propagation, default initial state behavior, service success responses, topic message sizing
-- **GNC-node unit tests**: zero-state output, known-state output, large-state output, negative-component output
-- **DLQR reference trajectory regression**: launches both nodes through `sim.launch.py`, records 91 steps of `env_data`, and compares each value against the committed reference fixture (`test/data/dlqr_reference_trajectory.csv`) within a tolerance of `1e-4`
+- `distributed_satellite_sim`
+  environment-node unit tests
+  DLQR GNC-node unit tests
+  QP-MPC controller unit tests
+  telemetry-buffer unit tests
+  DLQR launch-based regression coverage
+  QP-MPC convergence launch coverage
+  telemetry-buffer launch coverage
+- `external_sim_bridge`
+  fake-backend unit tests
+  bridge-node unit tests
+  reference launch validation
+  Basilisk-backend validation tests
 
-## Roadmap
+## Working In The Repo
 
-Completed milestones:
+When modifying behavior, change configuration before changing code when possible:
 
-- ROS 2 DLQR implementation validated against the original reference executables
-- end-to-end launch-based regression test committed and passing
+- scenario/timing/dynamics defaults live in YAML under [`src/DistributedSatelliteSim/config`](src/DistributedSatelliteSim/config)
+- controller and simulation logic live under [`src/DistributedSatelliteSim/include/distributed_satellite_sim`](src/DistributedSatelliteSim/include/distributed_satellite_sim)
+- deployment behavior lives under [`demo`](demo) and [`.docker`](.docker)
+- bridge behavior lives under [`src/external_sim_bridge`](src/external_sim_bridge)
 
-Near-term work is centered on:
+## Current Limitations
 
-- parameterizing the environment model for alternate controller configurations
-- integrating the QP_MPC controller path
+- the default `sim.launch.py` path is still centered on the DLQR baseline
+- the QP-MPC path uses a different scenario configuration and is not just a drop-in controller swap
+- the external bridge exists on `main`, but external-simulator validation is still a less mature path than the internal DLQR baseline
+- the manuscripts branch describes broader project direction than what has been fully operationalized on `main`
 
-The `reference/QP_MPC` code is already in the repository, but it is not wired into the ROS 2 package yet and uses different dynamics and timing than the current DLQR environment.
+## Glossary
 
-That difference is significant: the QP_MPC path is not just a second controller implementation. It will require environment reconfiguration as well, because the reference code uses different matrices, timing, and scenario assumptions than the current DLQR node pair.
+- **ROS 2**: the middleware/framework used to let different processes exchange data in a standard way.
+- **Node**: a single running program in ROS 2. In this repo, `env_node`, `gnc_node`, and `telemetry_buffer_node` are examples.
+- **Topic**: a one-way stream of messages. Here, `env_data` is the main state stream.
+- **Service**: a request/response call. Here, `actuation_cmd` is how the controller sends thrust commands back.
+- **ENV**: shorthand for the environment/simulation side of the system.
+- **GNC**: shorthand for guidance, navigation, and control; here it means the controller side.
+- **DLQR**: a linear-quadratic regulator used for the baseline controller on `main`.
+- **QP-MPC**: a model-predictive control approach that solves an optimization problem at each step.
+- **Bridge**: an adapter that lets an external simulator present the same ROS interface as the built-in environment node.
+- **Telemetry buffer**: a helper node that keeps a recent rolling history of states, applied thrust, and log messages for debugging and operator support.
 
-## Current limitations
+## Additional Project Context
 
-- the environment dynamics are hardcoded rather than configured through parameters or YAML
-- the launch flow currently targets the DLQR scenario only
-- the external simulator bridge described in the project manuscripts is not implemented on `main`
-
-## Additional project context
-
-The `no-merge/manuscripts` branch contains the proposal, presentation, and progress reports for the broader ASTRO project:
+The `no-merge/manuscripts` branch contains the proposal, presentation material, and written project reports for the broader ASTRO effort:
 
 - [manuscripts branch](https://github.com/Accommodus/ASTRO/tree/no-merge/manuscripts)
-- [presentation](https://github.com/Accommodus/ASTRO/blob/no-merge/manuscripts/presentation/main.typ)
+- [presentation](https://github.com/Accommodus/ASTRO/blob/no-merge/manuscripts/presentations/final.typ)
 - [proposal](https://github.com/Accommodus/ASTRO/tree/no-merge/manuscripts/proposal)
 
-Those materials are useful if you want the higher-level rationale for the project, especially:
-
-- why the lab wants ROS 2 instead of ad hoc UDP coupling
-- the distinction between internal ROS 2 and bridge-based simulator architectures
-- the intended longer-term expansion toward alternate controllers and operator-facing tooling
+Those materials are useful for understanding why ASTRO exists and what the broader long-term architecture was meant to become. For current behavior on `main`, prefer this README, [`demo/README.md`](demo/README.md), and [`docs/next-phase-plan.md`](docs/next-phase-plan.md).
